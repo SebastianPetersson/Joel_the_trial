@@ -194,17 +194,21 @@ function renderMedalPentagon(ids){
   const size = 320;
   const center = size / 2;
   const vertices = getPentagonVertices(size, 118);
-  const labelPoints = getPentagonVertices(size, 108);
   const outline = vertices.map(point => `${point.x},${point.y}`).join(' ');
   const slices = ids.map((id, index) => {
     const current = vertices[index];
     const next = vertices[(index + 1) % vertices.length];
+    const edgeMidX = (current.x + next.x) / 2;
+    const edgeMidY = (current.y + next.y) / 2;
+    const labelPoint = {
+      x: center + ((edgeMidX - center) * 0.72),
+      y: center + ((edgeMidY - center) * 0.72)
+    };
     const label = medalInfo[id][0].replace(/^[^\p{L}\p{N}]+\s*/u, '');
     const words = label.split(' ');
     const mid = Math.ceil(words.length / 2);
     const lineOne = escapeHtml(words.slice(0, mid).join(' '));
     const lineTwo = escapeHtml(words.slice(mid).join(' '));
-    const labelPoint = labelPoints[index];
     return `
       <g class="medalSliceGroup">
         <polygon class="medalSlice ${state.medals[id] ? 'on' : ''}" points="${center},${center} ${current.x},${current.y} ${next.x},${next.y}" />
