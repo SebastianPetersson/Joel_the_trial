@@ -4,11 +4,15 @@
 const DEFAULT_INTERVAL = 30 * 60;
 let state = JSON.parse(localStorage.getItem('joelSurvivalPWA') || 'null') || {
   score:0, remaining:DEFAULT_INTERVAL, interval:DEFAULT_INTERVAL, running:false,
-  currentEvent:'Ingen ännu', done:{}, medals:{}, custom:[], bought:{}
+  currentEvent:'Ingen ännu', done:{}, medals:{}, custom:[], bought:{}, timerEndsAt:null
 };
 state.done ||= {}; state.medals ||= {}; state.custom ||= []; state.bought ||= {};
-if(!state.interval) state.interval = DEFAULT_INTERVAL;
-if(!state.remaining) state.remaining = state.interval;
+if(typeof state.interval !== 'number' || state.interval <= 0) state.interval = DEFAULT_INTERVAL;
+if(typeof state.remaining !== 'number' || state.remaining < 0) state.remaining = state.interval;
+state.running = !!state.running;
+state.timerEndsAt = typeof state.timerEndsAt === 'number' ? state.timerEndsAt : null;
+if(state.running && !state.timerEndsAt) state.timerEndsAt = Date.now() + (state.remaining * 1000);
+if(!state.running) state.timerEndsAt = null;
 
 const medalInfo = {
   eld: ['🔥 Eldmästare','Du tämjde elden.'],
@@ -77,7 +81,7 @@ const events = [
 
 const shopItems = [
   {id:'kniv', medal:'skytt', name:'🗡️ Kniv', cost:15},
-  {id:'snore', medal:'borg', name:'🧵 Snöre', cost:5},
+  {id:'snore', medal:'borg', name:'🪢 Rep', cost:5},
   {id:'ved', medal:'eld', name:'🪵 Ved', cost:5},
   {id:'fisketill', medal:'djup', name:'🪱 Fisketillbehör', cost:5},
   {id:'tandstal', medal:'eld', name:'🔥 Tändstål', cost:5},
@@ -88,6 +92,7 @@ const shopItems = [
   {id:'mygg', medal:'misc', name:'🦟 Myggmedel', cost:20},
   {id:'gaffel', medal:'misc', name:'🍴 Gaffel', cost:20},
   {id:'a4', medal:'misc', name:'📜 Ett A4', cost:20},
+  {id:'gardin-shop', medal:'misc', name:'🪟 Gardin', cost:10},
   {id:'poncho', medal:'misc', name:'🌧️ Poncho', cost:20}
 ];
 
@@ -135,6 +140,15 @@ function autoUpdateMedals(){
   });
 }
 function save(){ localStorage.setItem('joelSurvivalPWA', JSON.stringify(state)); }
+function escapeHtml(value){
+  return String(value).replace(/[&<>"']/g, char => ({
+    '&':'&amp;',
+    '<':'&lt;',
+    '>':'&gt;',
+    '"':'&quot;',
+    "'":'&#39;'
+  })[char]);
+}
 function toast(t){ const d=document.createElement('div'); d.className='toast'; d.textContent=t; document.body.appendChild(d); setTimeout(()=>d.remove(),1200); }
 function addPoints(n){ state.score=Math.max(0,state.score+n); save(); render(); if(n>0)toast('+'+n+' poäng'); }
 function showTab(id, el){ document.querySelectorAll('section').forEach(s=>s.classList.remove('activeSec')); document.getElementById(id).classList.add('activeSec'); document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active')); if(el)el.classList.add('active'); }
@@ -143,13 +157,51 @@ function complete(id, pts){ if(state.done[id])return; state.done[id]=true; state
 function undo(id, pts){ if(!state.done[id])return; state.done[id]=false; state.score=Math.max(0,state.score-pts); autoUpdateMedals(); save(); render(); }
 function buy(id,cost){ if(state.bought[id])return; if(state.score<cost){ toast('Inte råd'); return; } state.score-=cost; state.bought[id]=true; autoUpdateMedals(); save(); render(); toast('Köpt'); }
 function fmt(s){ return String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0'); }
-function startTimer(){ state.running=true; save(); render(); }
-function pauseTimer(){ state.running=false; save(); render(); }
-function resetTimer(){ state.remaining=state.interval; state.running=false; save(); render(); }
-function changeInterval(){ state.interval=parseInt(document.getElementById('intervalSelect').value,10); state.remaining=state.interval; save(); render(); }
+function syncTimer(){
+  if(!state.running || !state.timerEndsAt) return false;
+  const remainingMs = state.timerEndsAt - Date.now();
+  if(remainingMs <= 0){
+    triggerEvent();
+    return true;
+  }
+  state.remaining = Math.ceil(remainingMs / 1000);
+  return false;
+}
+function startTimer(){
+  syncTimer();
+  state.running = true;
+  state.timerEndsAt = Date.now() + (state.remaining * 1000);
+  save();
+  render();
+}
+function pauseTimer(){
+  syncTimer();
+  state.running = false;
+  state.timerEndsAt = null;
+  save();
+  render();
+}
+function resetTimer(){
+  state.remaining = state.interval;
+  state.running = false;
+  state.timerEndsAt = null;
+  save();
+  render();
+}
+function changeInterval(){
+  state.interval = parseInt(document.getElementById('intervalSelect').value,10);
+  state.remaining = state.interval;
+  state.timerEndsAt = state.running ? Date.now() + (state.interval * 1000) : null;
+  save();
+  render();
+}
 function triggerEvent(){
   const ev=events[Math.floor(Math.random()*events.length)];
-  state.currentEvent=ev; state.remaining=state.interval; save(); render();
+  state.currentEvent = ev;
+  state.remaining = state.interval;
+  state.timerEndsAt = state.running ? Date.now() + (state.interval * 1000) : null;
+  save();
+  render();
   document.getElementById('modalEvent').textContent=ev; document.getElementById('eventModal').classList.add('show');
   if(navigator.vibrate) navigator.vibrate([250,100,250]);
 }
@@ -158,7 +210,7 @@ function addCustomChallenge(){
   const name=document.getElementById('newName').value.trim();
   const pts=parseInt(document.getElementById('newPts').value,10);
   const medal=document.getElementById('newMedal').value;
-  if(!name||!pts)return;
+  if(!name || !Number.isFinite(pts) || pts <= 0) return;
   state.custom.push({id:'custom'+Date.now(),name,pts,medal});
   document.getElementById('newName').value=''; document.getElementById('newPts').value='';
   save(); render(); showTabById('challenges');
@@ -169,7 +221,7 @@ function itemRequirementCard(item){
   const ok = !!state.bought[item.id];
   return `<div class="card challenge ${ok?'bought':''}">
     <div>
-      <div class="name ${ok?'done':''}">${item.name}</div>
+      <div class="name ${ok?'done':''}">${escapeHtml(item.name)}</div>
       <div class="small">Shopkrav – ${item.cost} poäng ${ok?'– köpt':''}</div>
     </div>
     <div style="display:grid;gap:6px">
@@ -180,7 +232,7 @@ function itemRequirementCard(item){
 function challengeCard(c){
   return `<div class="card challenge">
     <div>
-      <div class="name ${state.done[c.id]?'done':''}">${c.name}</div>
+      <div class="name ${state.done[c.id]?'done':''}">${escapeHtml(c.name)}</div>
       <div class="small">${c.pts} poäng</div>
     </div>
     <div style="display:grid;gap:6px">
@@ -200,16 +252,16 @@ function questBlock(id, allChallenges){
   const isDone = !!state.medals[id];
   const rules = medalRules[id] || [];
   const direct = id === 'djup' && state.done.egenfisk;
-  const reqHtml = rules.map(r=>`<div class="req ${r.ok()?'ok':''}">${r.ok()?'✓':'○'} ${r.label}</div>`).join('')
+  const reqHtml = rules.map(r=>`<div class="req ${r.ok()?'ok':''}">${r.ok()?'✓':'○'} ${escapeHtml(r.label)}</div>`).join('')
     + (id==='djup' ? `<div class="req ${direct?'ok':''}">${direct?'✓':'○'} Direkt upplåsning: fånga fisk med egentillverkat redskap</div>` : '');
   const shopHtml = shopItems.filter(i=>i.medal===id).map(itemRequirementCard).join('');
   const challengesHtml = allChallenges.filter(c=>c.medal===id).map(challengeCard).join('');
   return `<div class="questBlock">
     <div class="questHead">
-      <div class="questTitle">${title}</div>
+      <div class="questTitle">${escapeHtml(title)}</div>
       <div class="questStatus ${isDone?'done':''}">${isDone?'Upplåst ✓':questProgress(id)}</div>
     </div>
-    <div class="small">${medalInfo[id][1]}</div>
+    <div class="small">${escapeHtml(medalInfo[id][1])}</div>
     <div class="reqList">${reqHtml}</div>
     <h3>Shopkrav / relaterade köp</h3>
     ${shopHtml || '<div class="small">Inga shopkrav.</div>'}
@@ -252,17 +304,17 @@ function render(){
   document.getElementById('medalProgress').textContent=`${unlocked} / ${ids.length} medaljer`;
   document.getElementById('medalDots').innerHTML=ids.map(id=>`<span class="dot ${state.medals[id]?'on':''}">${medalInfo[id][0].split(' ')[0]}</span>`).join('');
   renderChallenges();
-  document.getElementById('eventList').innerHTML='<h2>Eventpool</h2>'+events.map(e=>`<div class="card">${e}</div>`).join('');
+  document.getElementById('eventList').innerHTML='<h2>Eventpool</h2>'+events.map(e=>`<div class="card">${escapeHtml(e)}</div>`).join('');
   document.getElementById('shop').innerHTML='<h2>Överlevnadsshop</h2>'+shopItems.map(i=>`
     <div class="card shopItem ${state.bought[i.id]?'bought':''}">
-      <div><div class="name">${i.name}</div><div class="small">${i.cost} poäng ${state.bought[i.id]?'– köpt':''}</div></div>
+      <div><div class="name">${escapeHtml(i.name)}</div><div class="small">${i.cost} poäng ${state.bought[i.id]?'– köpt':''}</div></div>
       <button ${state.bought[i.id]?'disabled':''} onclick="buy('${i.id}',${i.cost})">${state.bought[i.id]?'Köpt':'Köp'}</button>
     </div>`).join('');
   document.getElementById('medalList').innerHTML=ids.map(id=>{
-    const reqs = (medalRules[id]||[]).map(r=>`<div class="req ${r.ok()?'ok':''}">${r.ok()?'✓':'○'} ${r.label}</div>`).join('')
+    const reqs = (medalRules[id]||[]).map(r=>`<div class="req ${r.ok()?'ok':''}">${r.ok()?'✓':'○'} ${escapeHtml(r.label)}</div>`).join('')
       + (id==='djup'?`<div class="req ${state.done.egenfisk?'ok':''}">${state.done.egenfisk?'✓':'○'} Direkt upplåsning: fånga fisk med egentillverkat redskap</div>`:'');
     return `<div class="medal ${state.medals[id]?'unlocked':''}">
-      <div class="name">${medalInfo[id][0]}</div><div class="small">${medalInfo[id][1]}</div>
+      <div class="name">${escapeHtml(medalInfo[id][0])}</div><div class="small">${escapeHtml(medalInfo[id][1])}</div>
       <div class="reqList">${reqs}</div>
       <br><div class="questStatus ${state.medals[id]?'done':''}">${state.medals[id]?'Automatiskt upplåst ✓':questProgress(id)}</div>
     </div>`;
@@ -270,7 +322,26 @@ function render(){
   const sel=document.getElementById('intervalSelect'); if(sel) sel.value=String(state.interval);
   save();
 }
-setInterval(()=>{ if(state.running){ state.remaining--; if(state.remaining<=0)triggerEvent(); save(); render(); } },1000);
+setInterval(()=>{
+  if(!state.running) return;
+  const before = state.remaining;
+  const triggered = syncTimer();
+  if(triggered) return;
+  if(state.remaining !== before){
+    save();
+    render();
+  }
+},1000);
+document.addEventListener('visibilitychange', () => {
+  if(document.hidden) return;
+  if(syncTimer()) return;
+  render();
+});
+window.addEventListener('focus', () => {
+  if(syncTimer()) return;
+  render();
+});
+syncTimer();
 render();
 
 if ('serviceWorker' in navigator) {
