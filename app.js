@@ -538,7 +538,7 @@ function render(){
     if(i.repeatable){
       const amount = boughtAmount(i.id);
       return `
-    <div class="card shopItem ${amount > 0 ? 'bought' : ''}">
+    <div class="card shopItem repeatableItem ${amount > 0 ? 'stocked' : ''}">
       <div>
         <div class="name">${escapeHtml(i.name)}</div>
         <div class="small">${i.unitCost} poäng per ${i.unitLabel}${amount > 0 ? ` – köpt ${amount} ${i.unitLabel}` : ''}</div>

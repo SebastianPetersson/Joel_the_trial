@@ -100,6 +100,9 @@ select,input{width:100%;background:#0d0b08;border-color:var(--line)}
 .eventName{font-size:23px;font-weight:900;color:#fff}
 .shopItem{display:flex;justify-content:space-between;align-items:center;gap:10px}
 .bought{opacity:.58}.bought .name:after{content:"  ✓";color:var(--gold)}
+.stocked .name:after{content:"  ✓";color:var(--gold)}
+.repeatableItem{opacity:1}
+.repeatableItem button{opacity:1}
 .medals{display:grid;grid-template-columns:1fr;gap:10px}
 .medalPentagonCard{
   border:1px solid #6f5525;
