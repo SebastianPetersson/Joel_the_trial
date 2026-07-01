@@ -15,8 +15,8 @@ if(state.running && !state.timerEndsAt) state.timerEndsAt = Date.now() + (state.
 if(!state.running) state.timerEndsAt = null;
 
 const EVENT_FANFARE_SRC = './fanfare.wav';
-const eventFanfare = typeof Audio !== 'undefined' ? new Audio(EVENT_FANFARE_SRC) : null;
 let fanfareTimeoutId = null;
+let activeFanfareAudios = [];
 
 const medalInfo = {
   eld: ['🔥 Eldmästare','Du tämjde elden.'],
@@ -187,19 +187,25 @@ function stopEventFanfare(){
     clearTimeout(fanfareTimeoutId);
     fanfareTimeoutId = null;
   }
-  if(eventFanfare){
-    eventFanfare.pause();
-    eventFanfare.currentTime = 0;
-  }
+  activeFanfareAudios.forEach(audio => {
+    audio.pause();
+    audio.currentTime = 0;
+  });
+  activeFanfareAudios = [];
 }
 function playEventFanfare(remainingPlays = 3){
-  if(!eventFanfare || remainingPlays <= 0) return;
+  if(typeof Audio === 'undefined' || remainingPlays <= 0) return;
   stopEventFanfare();
 
   const playOnce = (playsLeft) => {
     if(playsLeft <= 0) return;
-    eventFanfare.currentTime = 0;
-    eventFanfare.play().catch(() => {});
+    const audio = new Audio(EVENT_FANFARE_SRC);
+    audio.preload = 'auto';
+    activeFanfareAudios.push(audio);
+    audio.play().catch(() => {});
+    audio.addEventListener('ended', () => {
+      activeFanfareAudios = activeFanfareAudios.filter(item => item !== audio);
+    }, { once:true });
     if(playsLeft === 1) return;
     fanfareTimeoutId = setTimeout(() => playOnce(playsLeft - 1), 3000);
   };
