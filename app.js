@@ -14,6 +14,10 @@ state.timerEndsAt = typeof state.timerEndsAt === 'number' ? state.timerEndsAt : 
 if(state.running && !state.timerEndsAt) state.timerEndsAt = Date.now() + (state.remaining * 1000);
 if(!state.running) state.timerEndsAt = null;
 
+const EVENT_FANFARE_SRC = './fanfare.wav';
+const eventFanfare = typeof Audio !== 'undefined' ? new Audio(EVENT_FANFARE_SRC) : null;
+let fanfareTimeoutId = null;
+
 const medalInfo = {
   eld: ['🔥 Eldmästare','Du tämjde elden.'],
   djup: ['🎣 Djupets Konung','Även de största av fiskar ger vika för dig.'],
@@ -178,6 +182,30 @@ function buyByUnit(id, unitCost){
   toast(`Köpt ${qty} m`);
 }
 function fmt(s){ return String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0'); }
+function stopEventFanfare(){
+  if(fanfareTimeoutId){
+    clearTimeout(fanfareTimeoutId);
+    fanfareTimeoutId = null;
+  }
+  if(eventFanfare){
+    eventFanfare.pause();
+    eventFanfare.currentTime = 0;
+  }
+}
+function playEventFanfare(remainingPlays = 3){
+  if(!eventFanfare || remainingPlays <= 0) return;
+  stopEventFanfare();
+
+  const playOnce = (playsLeft) => {
+    if(playsLeft <= 0) return;
+    eventFanfare.currentTime = 0;
+    eventFanfare.play().catch(() => {});
+    if(playsLeft === 1) return;
+    fanfareTimeoutId = setTimeout(() => playOnce(playsLeft - 1), 3000);
+  };
+
+  playOnce(remainingPlays);
+}
 function syncTimer(){
   if(!state.running || !state.timerEndsAt) return false;
   const remainingMs = state.timerEndsAt - Date.now();
@@ -216,13 +244,14 @@ function changeInterval(){
   save();
   render();
 }
-function triggerEvent(){
+function triggerEvent(isManual = false){
   const ev=events[Math.floor(Math.random()*events.length)];
   state.currentEvent = ev;
   state.remaining = state.interval;
   state.timerEndsAt = state.running ? Date.now() + (state.interval * 1000) : null;
   save();
   render();
+  playEventFanfare(isManual ? 1 : 3);
   document.getElementById('modalEvent').textContent=ev; document.getElementById('eventModal').classList.add('show');
   if(navigator.vibrate) navigator.vibrate([250,100,250]);
 }
