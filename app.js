@@ -43,6 +43,7 @@ const baseChallenges = [
 
   {id:'pilbåge', medal:'skytt', pts:10, name:'Bygg en pilbåge och träffa en tavla'},
   {id:'spjut', medal:'skytt', pts:5, name:'Tillverka ett fungerande spjut'},
+  {id:'majsburk', medal:'skytt', pts:10, name:'Träffa en majsburk med luftgevär från 20 meters avstånd'},
   {id:'mygga', medal:'skytt', pts:10, name:'Fånga en levande mygga med fingrarna, Zen Master Style'},
 
   {id:'bär', medal:'misc', pts:1, name:'Plocka 20 bär'},
@@ -80,14 +81,16 @@ const events = [
 ];
 
 const shopItems = [
-  {id:'kniv', medal:'skytt', name:'🗡️ Kniv', cost:15},
+  {id:'kniv', medal:'skytt', name:'🗡️ Kniv', cost:10},
+  {id:'yxa', medal:'borg', name:'🪓 Yxa', cost:10},
   {id:'snore', medal:'borg', name:'🪢 Rep', cost:5},
+  {id:'tandstal', medal:'eld', name:'🔥 Tändstål', cost:5},
   {id:'ved', medal:'eld', name:'🪵 Ved', cost:5},
   {id:'fisketill', medal:'djup', name:'🪱 Fisketillbehör', cost:5},
-  {id:'tandstal', medal:'eld', name:'🔥 Tändstål', cost:5},
-  {id:'yxa', medal:'borg', name:'🪓 Yxa', cost:10},
+  {id:'fiskelina', medal:'djup', name:'🧵 Fiskelina', unitCost:1, unitLabel:'meter', repeatable:true},
   {id:'metspo', medal:'djup', name:'🎣 Metspö + tillbehör', cost:15},
-  {id:'kastspo', medal:'djup', name:'🎣 Kastspö', cost:15},
+  {id:'kastspo', medal:'djup', name:'🎣 Kastspö', cost:20},
+  {id:'stekspade-shop', medal:'våg', name:'🍳 Stekspade', cost:1},
   {id:'mystery', medal:'misc', name:'❓ Mystery lootbox', cost:20},
   {id:'mygg', medal:'misc', name:'🦟 Myggmedel', cost:20},
   {id:'gaffel', medal:'misc', name:'🍴 Gaffel', cost:20},
@@ -121,6 +124,7 @@ const medalRules = {
   skytt: [
     {label:'Byggt pilbåge och träffat tavla', ok:()=>!!state.done.pilbåge},
     {label:'Tillverkat ett fungerande spjut', ok:()=>!!state.done.spjut},
+    {label:'Träffat en majsburk med luftgevär från 20 meters avstånd', ok:()=>!!state.done.majsburk},
     {label:'Fångat en levande mygga med fingrarna', ok:()=>!!state.done.mygga}
   ]
 };
@@ -155,7 +159,24 @@ function showTab(id, el){ document.querySelectorAll('section').forEach(s=>s.clas
 function showTabById(id){ const tab=[...document.querySelectorAll('.tab')].find(t=>t.getAttribute('onclick')?.includes(id)); showTab(id, tab); }
 function complete(id, pts){ if(state.done[id])return; state.done[id]=true; state.score+=pts; autoUpdateMedals(); save(); render(); toast('+'+pts+' poäng'); }
 function undo(id, pts){ if(!state.done[id])return; state.done[id]=false; state.score=Math.max(0,state.score-pts); autoUpdateMedals(); save(); render(); }
+function boughtAmount(id){
+  const value = state.bought[id];
+  return typeof value === 'number' && Number.isFinite(value) ? Math.max(0, value) : (value ? 1 : 0);
+}
 function buy(id,cost){ if(state.bought[id])return; if(state.score<cost){ toast('Inte råd'); return; } state.score-=cost; state.bought[id]=true; autoUpdateMedals(); save(); render(); toast('Köpt'); }
+function buyByUnit(id, unitCost){
+  const input = document.getElementById(`${id}-qty`);
+  const qty = parseInt(input?.value, 10);
+  if(!Number.isInteger(qty) || qty <= 0){ toast('Ange antal meter'); return; }
+  const totalCost = qty * unitCost;
+  if(state.score < totalCost){ toast('Inte råd'); return; }
+  state.score -= totalCost;
+  state.bought[id] = boughtAmount(id) + qty;
+  autoUpdateMedals();
+  save();
+  render();
+  toast(`Köpt ${qty} m`);
+}
 function fmt(s){ return String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0'); }
 function syncTimer(){
   if(!state.running || !state.timerEndsAt) return false;
@@ -218,7 +239,19 @@ function addCustomChallenge(){
 function hardReset(){ if(confirm('Nollställa allt?')){ localStorage.removeItem('joelSurvivalPWA'); location.reload(); } }
 
 function itemRequirementCard(item){
-  const ok = !!state.bought[item.id];
+  const amount = boughtAmount(item.id);
+  const ok = item.repeatable ? amount > 0 : !!state.bought[item.id];
+  if(item.repeatable){
+    return `<div class="card challenge ${ok?'bought':''}">
+      <div>
+        <div class="name ${ok?'done':''}">${escapeHtml(item.name)}</div>
+        <div class="small">${item.unitCost} poäng per ${item.unitLabel}${ok?` – köpt ${amount} ${item.unitLabel}`:''}</div>
+      </div>
+      <div style="display:grid;gap:6px">
+        <div class="small">Meterpris</div>
+      </div>
+    </div>`;
+  }
   return `<div class="card challenge ${ok?'bought':''}">
     <div>
       <div class="name ${ok?'done':''}">${escapeHtml(item.name)}</div>
@@ -305,11 +338,27 @@ function render(){
   document.getElementById('medalDots').innerHTML=ids.map(id=>`<span class="dot ${state.medals[id]?'on':''}">${medalInfo[id][0].split(' ')[0]}</span>`).join('');
   renderChallenges();
   document.getElementById('eventList').innerHTML='<h2>Eventpool</h2>'+events.map(e=>`<div class="card">${escapeHtml(e)}</div>`).join('');
-  document.getElementById('shop').innerHTML='<h2>Överlevnadsshop</h2>'+shopItems.map(i=>`
+  document.getElementById('shop').innerHTML='<h2>Överlevnadsshop</h2>'+shopItems.map(i=>{
+    if(i.repeatable){
+      const amount = boughtAmount(i.id);
+      return `
+    <div class="card shopItem ${amount > 0 ? 'bought' : ''}">
+      <div>
+        <div class="name">${escapeHtml(i.name)}</div>
+        <div class="small">${i.unitCost} poäng per ${i.unitLabel}${amount > 0 ? ` – köpt ${amount} ${i.unitLabel}` : ''}</div>
+      </div>
+      <div style="display:grid;grid-template-columns:90px auto;gap:8px;align-items:center">
+        <input id="${i.id}-qty" type="number" min="1" step="1" value="1" aria-label="${escapeHtml(i.name)} antal ${i.unitLabel}" />
+        <button onclick="buyByUnit('${i.id}',${i.unitCost})">Köp meter</button>
+      </div>
+    </div>`;
+    }
+    return `
     <div class="card shopItem ${state.bought[i.id]?'bought':''}">
       <div><div class="name">${escapeHtml(i.name)}</div><div class="small">${i.cost} poäng ${state.bought[i.id]?'– köpt':''}</div></div>
       <button ${state.bought[i.id]?'disabled':''} onclick="buy('${i.id}',${i.cost})">${state.bought[i.id]?'Köpt':'Köp'}</button>
-    </div>`).join('');
+    </div>`;
+  }).join('');
   document.getElementById('medalList').innerHTML=ids.map(id=>{
     const reqs = (medalRules[id]||[]).map(r=>`<div class="req ${r.ok()?'ok':''}">${r.ok()?'✓':'○'} ${escapeHtml(r.label)}</div>`).join('')
       + (id==='djup'?`<div class="req ${state.done.egenfisk?'ok':''}">${state.done.egenfisk?'✓':'○'} Direkt upplåsning: fånga fisk med egentillverkat redskap</div>`:'');
