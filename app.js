@@ -394,5 +394,35 @@ syncTimer();
 render();
 
 if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js'));
+  let refreshingForUpdate = false;
+
+  const reloadForUpdate = () => {
+    if(refreshingForUpdate) return;
+    refreshingForUpdate = true;
+    window.location.reload();
+  };
+
+  const checkForAppUpdate = async () => {
+    try {
+      const registration = await navigator.serviceWorker.getRegistration();
+      if(registration) await registration.update();
+    } catch {}
+  };
+
+  navigator.serviceWorker.addEventListener('controllerchange', reloadForUpdate);
+
+  window.addEventListener('load', async () => {
+    try {
+      await navigator.serviceWorker.register('./sw.js', { updateViaCache:'none' });
+      await checkForAppUpdate();
+    } catch {}
+  });
+
+  window.addEventListener('focus', checkForAppUpdate);
+  window.addEventListener('online', checkForAppUpdate);
+  document.addEventListener('visibilitychange', () => {
+    if(document.hidden) return;
+    checkForAppUpdate();
+  });
+  setInterval(checkForAppUpdate, 60 * 1000);
 }

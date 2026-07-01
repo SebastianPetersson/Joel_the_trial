@@ -28,8 +28,12 @@ self.addEventListener('fetch', event => {
   const url = new URL(request.url);
   if(url.origin !== self.location.origin) return;
 
+  const networkRequest = request.mode === 'navigate'
+    ? new Request(request, { cache:'no-store' })
+    : request;
+
   event.respondWith(
-    fetch(request)
+    fetch(networkRequest)
       .then(response => {
         if(!response.ok) return response;
         const copy = response.clone();
