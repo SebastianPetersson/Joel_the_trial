@@ -4,9 +4,9 @@
 const DEFAULT_INTERVAL = 30 * 60;
 let state = JSON.parse(localStorage.getItem('joelSurvivalPWA') || 'null') || {
   score:0, remaining:DEFAULT_INTERVAL, interval:DEFAULT_INTERVAL, running:false,
-  currentEvent:'Ingen ännu', done:{}, medals:{}, custom:[], bought:{}, timerEndsAt:null
+  currentEvent:'Ingen ännu', done:{}, medals:{}, custom:[], bought:{}, timerEndsAt:null, usedEvents:{}
 };
-state.done ||= {}; state.medals ||= {}; state.custom ||= []; state.bought ||= {};
+state.done ||= {}; state.medals ||= {}; state.custom ||= []; state.bought ||= {}; state.usedEvents ||= {};
 if(typeof state.interval !== 'number' || state.interval <= 0) state.interval = DEFAULT_INTERVAL;
 if(typeof state.remaining !== 'number' || state.remaining < 0) state.remaining = state.interval;
 state.running = !!state.running;
@@ -66,55 +66,56 @@ const baseChallenges = [
   {id:'majsburk', medal:'skytt', pts:10, name:'Träffa en majsburk med luftgevär från 20 meters avstånd'},
   {id:'mygga', medal:'skytt', pts:10, name:'Fånga en levande mygga med fingrarna, Zen Master Style'},
 
-  {id:'bär', medal:'misc', pts:1, name:'Plocka 20 bär'},
-  {id:'skor', medal:'misc', pts:1, name:'Gå 10 min med skor på fel fot'},
-  {id:'kalsong', medal:'misc', pts:1, name:'En hand innanför kallingarna tills nästa poäng'},
-  {id:'fjäder', medal:'misc', pts:1, name:'Hitta en fjäder'},
-  {id:'pirat', medal:'misc', pts:1, name:'Prata som en pirat i 10 minuter'},
-  {id:'baklänges', medal:'misc', pts:1, name:'Gå baklänges i 100 meter'},
-  {id:'pinnegevär', medal:'misc', pts:1, name:'Håll en pinne som gevär i 10 minuter'},
-  {id:'huk', medal:'misc', pts:1, name:'Sitt på huk i 2 minuter'},
-  {id:'kapten', medal:'misc', pts:1, name:'Byt namn till Kapten Joel tills nästa poäng'},
-  {id:'kottar', medal:'misc', pts:1, name:'Samla 10 kottar'},
-  {id:'blad', medal:'misc', pts:1, name:'Hitta tre olika sorters blad'},
-  {id:'barkbåt', medal:'misc', pts:1, name:'Gör en barkbåt som flyter i minst 30 sekunder'},
-  {id:'knopar', medal:'misc', pts:3, name:'Knyt tre olika knopar'},
-  {id:'träsked', medal:'misc', pts:3, name:'Tillverka en träsked eller smörkniv'},
-  {id:'djurspår', medal:'misc', pts:3, name:'Hitta ett djurspår'},
-  {id:'halsband', medal:'misc', pts:3, name:'Gör ett halsband av naturmaterial'},
-  {id:'stenröse', medal:'misc', pts:3, name:'Bygg ett litet stenröse'},
-  {id:'ätbart', medal:'misc', pts:3, name:'Hitta något ätbart i naturen, måste godkännas'},
+  {id:'bär', medal:'misc', pts:3, name:'Plocka 20 bär'},
+  {id:'skor', medal:'misc', pts:3, name:'Gå 10 min med skor på fel fot'},
+  {id:'kalsong', medal:'misc', pts:3, name:'En hand innanför kallingarna tills nästa poäng'},
+  {id:'fjäder', medal:'misc', pts:3, name:'Hitta en fjäder'},
+  {id:'pirat', medal:'misc', pts:3, name:'Prata som en pirat i 10 minuter'},
+  {id:'baklänges', medal:'misc', pts:3, name:'Gå baklänges i 100 meter'},
+  {id:'pinnegevär', medal:'misc', pts:3, name:'Håll en pinne som gevär i 10 minuter'},
+  {id:'huk', medal:'misc', pts:3, name:'Sitt på huk i 2 minuter'},
+  {id:'kapten', medal:'misc', pts:3, name:'Byt namn till Kapten Joel tills nästa poäng'},
+  {id:'kottar', medal:'misc', pts:3, name:'Samla 10 kottar'},
+  {id:'blad', medal:'misc', pts:3, name:'Hitta tre olika sorters blad'},
+  {id:'barkbåt', medal:'misc', pts:3, name:'Gör en barkbåt som flyter i minst 30 sekunder'},
+  {id:'knopar', medal:'misc', pts:4, name:'Knyt tre olika knopar'},
+  {id:'träsked', medal:'misc', pts:4, name:'Tillverka en träsked eller smörkniv'},
+  {id:'djurspår', medal:'misc', pts:4, name:'Hitta ett djurspår'},
+  {id:'halsband', medal:'misc', pts:4, name:'Gör ett halsband av naturmaterial'},
+  {id:'stenröse', medal:'misc', pts:4, name:'Bygg ett litet stenröse'},
+  {id:'ätbart', medal:'misc', pts:4, name:'Hitta något ätbart i naturen, måste godkännas'},
   {id:'kantareller', medal:'misc', pts:5, name:'Samla 10 kantareller, 1 gång'},
   {id:'sommarbanger', medal:'misc', pts:5, name:'Skriv och uppträd en sommarbanger'},
-  {id:'rap', medal:'misc', pts:5, name:'Freestyla en rap om hur du och Alex träffades'},
   {id:'visselpipa', medal:'misc', pts:5, name:'Gör en visselpipa av ett blad'},
-  {id:'högsta', medal:'misc', pts:5, name:'Hitta den högsta punkten i området'}
+  {id:'högsta', medal:'misc', pts:3, name:'Hitta den högsta punkten i området'}
 ];
 
 const events = [
-  'Kasta macka – 1 poäng per studs',
-  'Drick en öl på 30 sekunder – 5 poäng',
-  'Yxkast mot stubbe – 5 poäng vid träff, tre försök',
-  'Survivor Quiz – 1 poäng per rätt fråga',
-  'Alex quiz – hur väl känner du din fru? 1 poäng per fråga',
-  'Lucky Shot – kasta en kotte i en hink eller kastrull 10 meter bort, 3 poäng'
+  {id:'macka', label:'Kasta macka – 1 poäng per studs'},
+  {id:'ol', label:'Drick en öl på 30 sekunder – 5 poäng'},
+  {id:'yxkast', label:'Yxkast mot stubbe – 5 poäng vid träff, tre försök'},
+  {id:'survivor-quiz', label:'Survivor Quiz – 1 poäng per rätt fråga', oneTime:true},
+  {id:'alex-quiz', label:'Alex quiz – hur väl känner du din fru? 1 poäng per fråga', oneTime:true},
+  {id:'lucky-shot', label:'Lucky Shot – kasta en kotte i en hink eller kastrull 10 meter bort, 3 poäng'},
+  {id:'freestyle-rap', label:'Freestyle rap – 5 poäng', oneTime:true}
 ];
 
 const shopItems = [
   {id:'kniv', medal:'skytt', name:'🗡️ Kniv', cost:10},
   {id:'luftgevar', medal:'skytt', name:'🔫 Luftgevär', cost:15},
-  {id:'luftgevarsskott', medal:'skytt', name:'🎯 Luftgevärsskott (10 st)', cost:5},
+  {id:'luftgevarsskott', medal:'skytt', name:'🎯 Luftgevärsskott (10 st)', unitCost:5, unitLabel:'omgångar', repeatable:true, buyLabel:'Köp omgång', quantityPrompt:'Ange antal omgångar'},
   {id:'yxa', medal:'borg', name:'🪓 Yxa', cost:10},
   {id:'snore', medal:'borg', name:'🪢 Rep', cost:5},
   {id:'tandstal', medal:'eld', name:'🔥 Tändstål', cost:5},
   {id:'ved', medal:'eld', name:'🪵 Ved', cost:10},
   {id:'fisketill', medal:'djup', name:'🪱 Fisketillbehör', cost:5},
-  {id:'fiskelina', medal:'djup', name:'🧵 Fiskelina', unitCost:1, unitLabel:'meter', repeatable:true},
+  {id:'fiskelina', medal:'djup', name:'🧵 Fiskelina', unitCost:1, unitLabel:'meter', repeatable:true, buyLabel:'Köp meter', quantityPrompt:'Ange antal meter'},
   {id:'metspo', medal:'djup', name:'🎣 Metspö + tillbehör', cost:15},
   {id:'kastspo', medal:'djup', name:'🎣 Kastspö', cost:20},
   {id:'stekspade-shop', medal:'våg', name:'🍳 Stekspade', cost:1},
   {id:'mystery', medal:'misc', name:'❓ Mystery lootbox', cost:25},
   {id:'mygg', medal:'misc', name:'🦟 Myggmedel', cost:20},
+  {id:'kompass', medal:'misc', name:'🧭 Kompass', cost:3},
   {id:'gaffel', medal:'misc', name:'🍴 Gaffel', cost:20},
   {id:'a4', medal:'misc', name:'📜 Ett A4', cost:5},
   {id:'gardin-shop', medal:'misc', name:'🪟 Gardin', cost:10},
@@ -279,8 +280,10 @@ function boughtAmount(id){
 function buy(id,cost){ if(state.bought[id])return; if(state.score<cost){ toast('Inte råd'); return; } state.score-=cost; state.bought[id]=true; autoUpdateMedals(); save(); render(); playSoundEffect(TRANSACTION_SOUND_SRC, transactionSoundTemplate); toast('Köpt'); }
 function buyByUnit(id, unitCost){
   const input = document.getElementById(`${id}-qty`);
+  const item = shopItems.find(shopItem => shopItem.id === id);
   const qty = parseInt(input?.value, 10);
-  if(!Number.isInteger(qty) || qty <= 0){ toast('Ange antal meter'); return; }
+  const quantityPrompt = item?.quantityPrompt || 'Ange antal';
+  if(!Number.isInteger(qty) || qty <= 0){ toast(quantityPrompt); return; }
   const totalCost = qty * unitCost;
   if(state.score < totalCost){ toast('Inte råd'); return; }
   state.score -= totalCost;
@@ -289,7 +292,7 @@ function buyByUnit(id, unitCost){
   save();
   render();
   playSoundEffect(TRANSACTION_SOUND_SRC, transactionSoundTemplate);
-  toast(`Köpt ${qty} m`);
+  toast(`Köpt ${qty} ${item?.unitLabel || ''}`.trim());
 }
 function fmt(s){ return String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0'); }
 function stopEventFanfare(){
@@ -374,6 +377,12 @@ function playEventFanfare(remainingPlays = 3){
 
   playOnce(remainingPlays);
 }
+function eventUsed(id){
+  return !!state.usedEvents[id];
+}
+function availableEvents(){
+  return events.filter(event => !event.oneTime || !eventUsed(event.id));
+}
 function syncTimer(){
   if(!state.running || !state.timerEndsAt) return false;
   const remainingMs = state.timerEndsAt - Date.now();
@@ -414,14 +423,16 @@ function changeInterval(){
   render();
 }
 function triggerEvent(isManual = false){
-  const ev=events[Math.floor(Math.random()*events.length)];
-  state.currentEvent = ev;
+  const pool = availableEvents();
+  const event = pool[Math.floor(Math.random()*pool.length)] || events[Math.floor(Math.random()*events.length)];
+  if(event.oneTime) state.usedEvents[event.id] = true;
+  state.currentEvent = event.label;
   state.remaining = state.interval;
   state.timerEndsAt = state.running ? Date.now() + (state.interval * 1000) : null;
   save();
   render();
   playEventFanfare(isManual ? 1 : 3);
-  document.getElementById('modalEvent').textContent=ev; document.getElementById('eventModal').classList.add('show');
+  document.getElementById('modalEvent').textContent=event.label; document.getElementById('eventModal').classList.add('show');
   if(navigator.vibrate) navigator.vibrate([250,100,250]);
 }
 function closeModal(){ document.getElementById('eventModal').classList.remove('show'); }
@@ -446,7 +457,7 @@ function itemRequirementCard(item){
         <div class="small">${item.unitCost} poäng per ${item.unitLabel}${ok?` – köpt ${amount} ${item.unitLabel}`:''}</div>
       </div>
       <div style="display:grid;gap:6px">
-        <div class="small">Meterpris</div>
+        <div class="small">Kan köpas flera gånger</div>
       </div>
     </div>`;
   }
@@ -533,7 +544,7 @@ function render(){
   document.getElementById('medalProgress').textContent=`${unlocked} / ${ids.length} medaljer`;
   document.getElementById('medalDots').innerHTML=ids.map(id=>`<span class="dot ${state.medals[id]?'on':''}">${medalInfo[id][0].split(' ')[0]}</span>`).join('');
   renderChallenges();
-  document.getElementById('eventList').innerHTML='<h2>Eventpool</h2>'+events.map(e=>`<div class="card">${escapeHtml(e)}</div>`).join('');
+  document.getElementById('eventList').innerHTML='<h2>Eventpool</h2>'+events.map(event=>`<div class="card ${event.oneTime && eventUsed(event.id) ? 'usedEvent' : ''}"><div class="name">${escapeHtml(event.label)}</div><div class="small">${event.oneTime ? (eventUsed(event.id) ? 'Engångsevent – redan slumpat' : 'Engångsevent – kan bara slumpas 1 gång') : 'Kan slumpas flera gånger'}</div></div>`).join('');
   document.getElementById('shop').innerHTML='<h2>Överlevnadsshop</h2>'+shopItems.map(i=>{
     if(i.repeatable){
       const amount = boughtAmount(i.id);
@@ -545,7 +556,7 @@ function render(){
       </div>
       <div style="display:grid;grid-template-columns:90px auto;gap:8px;align-items:center">
         <input id="${i.id}-qty" type="number" min="1" step="1" value="1" aria-label="${escapeHtml(i.name)} antal ${i.unitLabel}" />
-        <button onclick="buyByUnit('${i.id}',${i.unitCost})">Köp meter</button>
+        <button onclick="buyByUnit('${i.id}',${i.unitCost})">${escapeHtml(i.buyLabel || 'Köp')}</button>
       </div>
     </div>`;
     }

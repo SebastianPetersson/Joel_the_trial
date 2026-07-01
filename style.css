@@ -98,6 +98,7 @@ select,input{width:100%;background:#0d0b08;border-color:var(--line)}
 .timer{font-family:system-ui,sans-serif;font-size:54px;font-weight:1000;letter-spacing:1px;color:var(--gold);text-align:center;margin:10px 0;text-shadow:0 0 20px #c79b3a44}
 .eventBox{border:1px dashed var(--gold);border-radius:16px;padding:14px;text-align:center;background:#1d140b;margin:10px 0}
 .eventName{font-size:23px;font-weight:900;color:#fff}
+.usedEvent{opacity:.58;border-color:#5b4422}
 .shopItem{display:flex;justify-content:space-between;align-items:center;gap:10px}
 .bought{opacity:.58}.bought .name:after{content:"  ✓";color:var(--gold)}
 .stocked .name:after{content:"  ✓";color:var(--gold)}
