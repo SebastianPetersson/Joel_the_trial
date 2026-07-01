@@ -194,23 +194,29 @@ function renderMedalPentagon(ids){
   const size = 320;
   const center = size / 2;
   const vertices = getPentagonVertices(size, 118);
-  const labelPoints = getPentagonVertices(size, 148);
+  const labelPoints = getPentagonVertices(size, 108);
   const outline = vertices.map(point => `${point.x},${point.y}`).join(' ');
   const slices = ids.map((id, index) => {
     const current = vertices[index];
     const next = vertices[(index + 1) % vertices.length];
-    const icon = escapeHtml(medalInfo[id][0].split(' ')[0]);
+    const label = medalInfo[id][0].replace(/^[^\p{L}\p{N}]+\s*/u, '');
+    const words = label.split(' ');
+    const mid = Math.ceil(words.length / 2);
+    const lineOne = escapeHtml(words.slice(0, mid).join(' '));
+    const lineTwo = escapeHtml(words.slice(mid).join(' '));
     const labelPoint = labelPoints[index];
     return `
       <g class="medalSliceGroup">
         <polygon class="medalSlice ${state.medals[id] ? 'on' : ''}" points="${center},${center} ${current.x},${current.y} ${next.x},${next.y}" />
-        <text class="medalSliceLabel ${state.medals[id] ? 'on' : ''}" x="${labelPoint.x}" y="${labelPoint.y}" text-anchor="middle" dominant-baseline="middle">${icon}</text>
+        <text class="medalSliceLabel ${state.medals[id] ? 'on' : ''}" x="${labelPoint.x}" y="${labelPoint.y}" text-anchor="middle" dominant-baseline="middle">
+          <tspan x="${labelPoint.x}" dy="${lineTwo ? '-0.55em' : '0'}">${lineOne}</tspan>
+          ${lineTwo ? `<tspan x="${labelPoint.x}" dy="1.1em">${lineTwo}</tspan>` : ''}
+        </text>
       </g>`;
   }).join('');
 
   return `
     <div class="medalPentagonCard">
-      <div class="small medalIntro">Fem delar. Fem medaljer. När en medalj klaras tänds dess del av sigillet.</div>
       <div class="medalPentagonWrap">
         <svg class="medalPentagon" viewBox="0 0 ${size} ${size}" aria-label="Medaljöversikt">
           ${slices}
@@ -227,7 +233,6 @@ function renderMedalPentagon(ids){
               <span class="medalLegendName">${escapeHtml(medalInfo[id][0])}</span>
               <span class="questStatus ${state.medals[id] ? 'done' : ''}">${state.medals[id] ? 'Upplåst ✓' : questProgress(id)}</span>
             </div>
-            <div class="small">${escapeHtml(medalInfo[id][1])}</div>
           </div>
         `).join('')}
       </div>

@@ -45,13 +45,14 @@ h3{font-size:18px;margin:16px 0 8px;color:#e6c77e}
   border:1px solid var(--line);border-radius:18px;background:
   linear-gradient(145deg,#21180e,#100d09 65%,#090806);box-shadow:0 12px 32px #0009,inset 0 0 0 1px #ffffff08;
 }
-.scoreCard{position:relative;margin:14px 0;padding:15px 15px 52px;border-color:#6f5525}
+.scoreCard{position:relative;margin:14px 0;padding:15px 15px 58px;border-color:#6f5525}
 .scoreRow{display:flex;justify-content:space-between;align-items:center;gap:12px}
 .score{font-family:system-ui,sans-serif;font-size:62px;font-weight:1000;color:var(--gold);line-height:.9}
 .settingsGear{
   position:absolute;
-  right:14px;
-  bottom:14px;
+  right:12px;
+  bottom:12px;
+  z-index:2;
   width:42px;
   height:42px;
   display:grid;
@@ -110,12 +111,11 @@ select,input{width:100%;background:#0d0b08;border-color:var(--line)}
     linear-gradient(145deg,#21180e,#100d09 65%,#090806);
   box-shadow:0 18px 40px #0009,inset 0 0 0 1px #ffffff08;
 }
-.medalIntro{text-align:center;margin-bottom:14px}
 .medalPentagonWrap{
   display:flex;
   justify-content:center;
   align-items:center;
-  padding:10px 0 18px;
+  padding:6px 0 18px;
 }
 .medalPentagon{
   width:min(100%, 360px);
@@ -159,8 +159,12 @@ select,input{width:100%;background:#0d0b08;border-color:var(--line)}
   font-weight:900;
 }
 .medalSliceLabel{
-  fill:#8e7e63;
-  font-size:22px;
+  fill:#9f9278;
+  font-family:"Cinzel", Georgia, "Times New Roman", serif;
+  font-size:10px;
+  font-weight:700;
+  letter-spacing:.6px;
+  text-transform:uppercase;
   transition:fill .25s ease, filter .25s ease;
 }
 .medalSliceLabel.on{
