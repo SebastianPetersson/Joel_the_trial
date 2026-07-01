@@ -107,18 +107,18 @@ const shopItems = [
   {id:'yxa', medal:'borg', name:'🪓 Yxa', cost:10},
   {id:'snore', medal:'borg', name:'🪢 Rep', cost:5},
   {id:'tandstal', medal:'eld', name:'🔥 Tändstål', cost:5},
-  {id:'ved', medal:'eld', name:'🪵 Ved', cost:5},
+  {id:'ved', medal:'eld', name:'🪵 Ved', cost:10},
   {id:'fisketill', medal:'djup', name:'🪱 Fisketillbehör', cost:5},
   {id:'fiskelina', medal:'djup', name:'🧵 Fiskelina', unitCost:1, unitLabel:'meter', repeatable:true},
   {id:'metspo', medal:'djup', name:'🎣 Metspö + tillbehör', cost:15},
   {id:'kastspo', medal:'djup', name:'🎣 Kastspö', cost:20},
   {id:'stekspade-shop', medal:'våg', name:'🍳 Stekspade', cost:1},
-  {id:'mystery', medal:'misc', name:'❓ Mystery lootbox', cost:20},
+  {id:'mystery', medal:'misc', name:'❓ Mystery lootbox', cost:25},
   {id:'mygg', medal:'misc', name:'🦟 Myggmedel', cost:20},
   {id:'gaffel', medal:'misc', name:'🍴 Gaffel', cost:20},
-  {id:'a4', medal:'misc', name:'📜 Ett A4', cost:20},
+  {id:'a4', medal:'misc', name:'📜 Ett A4', cost:5},
   {id:'gardin-shop', medal:'misc', name:'🪟 Gardin', cost:10},
-  {id:'poncho', medal:'misc', name:'🌧️ Poncho', cost:20}
+  {id:'poncho', medal:'misc', name:'🌧️ Poncho', cost:5}
 ];
 
 const medalRules = {
