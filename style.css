@@ -157,16 +157,25 @@ select,input{width:100%;background:#0d0b08;border-color:var(--line)}
   font-size:24px;
   font-weight:900;
 }
-.medalSliceLabel{
-  fill:#9f9278;
+.medalConnector{
+  stroke:#7d6741;
+  stroke-width:2;
+  opacity:.8;
+}
+.medalConnector.on{
+  stroke:#e7c776;
+  filter:drop-shadow(0 0 6px #c79b3a77);
+}
+.medalOuterLabel{
+  fill:#b4a382;
   font-family:"Cinzel", Georgia, "Times New Roman", serif;
-  font-size:10px;
+  font-size:11px;
   font-weight:700;
   letter-spacing:.6px;
   text-transform:uppercase;
   transition:fill .25s ease, filter .25s ease;
 }
-.medalSliceLabel.on{
+.medalOuterLabel.on{
   fill:#fff3cf;
   filter:drop-shadow(0 0 8px #fff2b3aa);
 }

@@ -200,19 +200,25 @@ function renderMedalPentagon(ids){
     const next = vertices[(index + 1) % vertices.length];
     const edgeMidX = (current.x + next.x) / 2;
     const edgeMidY = (current.y + next.y) / 2;
+    const connectorStart = {
+      x: center + ((edgeMidX - center) * 1.02),
+      y: center + ((edgeMidY - center) * 1.02)
+    };
     const labelPoint = {
-      x: center + ((edgeMidX - center) * 0.72),
-      y: center + ((edgeMidY - center) * 0.72)
+      x: center + ((edgeMidX - center) * 1.22),
+      y: center + ((edgeMidY - center) * 1.22)
     };
     const label = medalInfo[id][0].replace(/^[^\p{L}\p{N}]+\s*/u, '');
     const words = label.split(' ');
     const mid = Math.ceil(words.length / 2);
     const lineOne = escapeHtml(words.slice(0, mid).join(' '));
     const lineTwo = escapeHtml(words.slice(mid).join(' '));
+    const textAnchor = Math.abs(labelPoint.x - center) < 18 ? 'middle' : (labelPoint.x < center ? 'end' : 'start');
     return `
       <g class="medalSliceGroup">
         <polygon class="medalSlice ${state.medals[id] ? 'on' : ''}" points="${center},${center} ${current.x},${current.y} ${next.x},${next.y}" />
-        <text class="medalSliceLabel ${state.medals[id] ? 'on' : ''}" x="${labelPoint.x}" y="${labelPoint.y}" text-anchor="middle" dominant-baseline="middle">
+        <line class="medalConnector ${state.medals[id] ? 'on' : ''}" x1="${connectorStart.x}" y1="${connectorStart.y}" x2="${labelPoint.x}" y2="${labelPoint.y}" />
+        <text class="medalOuterLabel ${state.medals[id] ? 'on' : ''}" x="${labelPoint.x}" y="${labelPoint.y}" text-anchor="${textAnchor}" dominant-baseline="middle">
           <tspan x="${labelPoint.x}" dy="${lineTwo ? '-0.55em' : '0'}">${lineOne}</tspan>
           ${lineTwo ? `<tspan x="${labelPoint.x}" dy="1.1em">${lineTwo}</tspan>` : ''}
         </text>
