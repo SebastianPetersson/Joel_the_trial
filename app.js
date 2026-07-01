@@ -15,13 +15,24 @@ if(state.running && !state.timerEndsAt) state.timerEndsAt = Date.now() + (state.
 if(!state.running) state.timerEndsAt = null;
 
 const EVENT_FANFARE_SRC = './fanfare.wav';
-const eventFanfareTemplate = typeof Audio !== 'undefined' ? new Audio(EVENT_FANFARE_SRC) : null;
+const CHALLENGE_COMPLETE_SRC = './klar.wav';
+const TRANSACTION_SOUND_SRC = './transaction.mp3';
+function createAudioTemplate(src){
+  if(typeof Audio === 'undefined') return null;
+  const audio = new Audio(src);
+  audio.preload = 'auto';
+  audio.playsInline = true;
+  audio.load();
+  return audio;
+}
+const eventFanfareTemplate = createAudioTemplate(EVENT_FANFARE_SRC);
+const challengeCompleteTemplate = createAudioTemplate(CHALLENGE_COMPLETE_SRC);
+const transactionSoundTemplate = createAudioTemplate(TRANSACTION_SOUND_SRC);
+const audioTemplates = [eventFanfareTemplate, challengeCompleteTemplate, transactionSoundTemplate].filter(Boolean);
 let fanfareTimeoutId = null;
 let activeFanfareAudios = [];
-if(eventFanfareTemplate){
-  eventFanfareTemplate.preload = 'auto';
-  eventFanfareTemplate.load();
-}
+let activeEffectAudios = [];
+let audioPlaybackUnlocked = false;
 
 const medalInfo = {
   eld: ['🔥 Eldmästare','Du tämjde elden.'],
@@ -166,13 +177,13 @@ function toast(t){ const d=document.createElement('div'); d.className='toast'; d
 function addPoints(n){ state.score=Math.max(0,state.score+n); save(); render(); if(n>0)toast('+'+n+' poäng'); }
 function showTab(id, el){ document.querySelectorAll('section').forEach(s=>s.classList.remove('activeSec')); document.getElementById(id).classList.add('activeSec'); document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active')); if(el)el.classList.add('active'); }
 function showTabById(id){ const tab=[...document.querySelectorAll('.tab')].find(t=>t.getAttribute('onclick')?.includes(id)); showTab(id, tab); }
-function complete(id, pts){ if(state.done[id])return; state.done[id]=true; state.score+=pts; autoUpdateMedals(); save(); render(); toast('+'+pts+' poäng'); }
+function complete(id, pts){ if(state.done[id])return; state.done[id]=true; state.score+=pts; autoUpdateMedals(); save(); render(); playSoundEffect(CHALLENGE_COMPLETE_SRC, challengeCompleteTemplate); toast('+'+pts+' poäng'); }
 function undo(id, pts){ if(!state.done[id])return; state.done[id]=false; state.score=Math.max(0,state.score-pts); autoUpdateMedals(); save(); render(); }
 function boughtAmount(id){
   const value = state.bought[id];
   return typeof value === 'number' && Number.isFinite(value) ? Math.max(0, value) : (value ? 1 : 0);
 }
-function buy(id,cost){ if(state.bought[id])return; if(state.score<cost){ toast('Inte råd'); return; } state.score-=cost; state.bought[id]=true; autoUpdateMedals(); save(); render(); toast('Köpt'); }
+function buy(id,cost){ if(state.bought[id])return; if(state.score<cost){ toast('Inte råd'); return; } state.score-=cost; state.bought[id]=true; autoUpdateMedals(); save(); render(); playSoundEffect(TRANSACTION_SOUND_SRC, transactionSoundTemplate); toast('Köpt'); }
 function buyByUnit(id, unitCost){
   const input = document.getElementById(`${id}-qty`);
   const qty = parseInt(input?.value, 10);
@@ -184,6 +195,7 @@ function buyByUnit(id, unitCost){
   autoUpdateMedals();
   save();
   render();
+  playSoundEffect(TRANSACTION_SOUND_SRC, transactionSoundTemplate);
   toast(`Köpt ${qty} m`);
 }
 function fmt(s){ return String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0'); }
@@ -198,10 +210,35 @@ function stopEventFanfare(){
   });
   activeFanfareAudios = [];
 }
-function createEventFanfareAudio(){
-  const audio = eventFanfareTemplate ? eventFanfareTemplate.cloneNode(true) : new Audio(EVENT_FANFARE_SRC);
+function createAudioFromTemplate(template, src){
+  const audio = template ? template.cloneNode(true) : new Audio(src);
   audio.preload = 'auto';
+  audio.playsInline = true;
   return audio;
+}
+async function unlockAudioPlayback(){
+  if(audioPlaybackUnlocked || typeof Audio === 'undefined') return;
+
+  const unlockAttempts = audioTemplates.map(async template => {
+    try {
+      template.muted = true;
+      template.currentTime = 0;
+      await template.play();
+      template.pause();
+      template.currentTime = 0;
+      template.muted = false;
+      return true;
+    } catch {
+      template.muted = false;
+      return false;
+    }
+  });
+
+  const results = await Promise.allSettled(unlockAttempts);
+  audioPlaybackUnlocked = results.some(result => result.status === 'fulfilled' && result.value);
+}
+function createEventFanfareAudio(){
+  return createAudioFromTemplate(eventFanfareTemplate, EVENT_FANFARE_SRC);
 }
 function startAudioFromBeginning(audio){
   const playAudio = () => {
@@ -216,6 +253,15 @@ function startAudioFromBeginning(audio){
 
   audio.addEventListener('canplaythrough', playAudio, { once:true });
   audio.load();
+}
+function playSoundEffect(src, template){
+  if(typeof Audio === 'undefined') return;
+  const audio = createAudioFromTemplate(template, src);
+  activeEffectAudios.push(audio);
+  startAudioFromBeginning(audio);
+  audio.addEventListener('ended', () => {
+    activeEffectAudios = activeEffectAudios.filter(item => item !== audio);
+  }, { once:true });
 }
 function playEventFanfare(remainingPlays = 3){
   if(typeof Audio === 'undefined' || remainingPlays <= 0) return;
@@ -246,6 +292,7 @@ function syncTimer(){
   return false;
 }
 function startTimer(){
+  unlockAudioPlayback();
   syncTimer();
   state.running = true;
   state.timerEndsAt = Date.now() + (state.remaining * 1000);
@@ -450,6 +497,10 @@ window.addEventListener('focus', () => {
 });
 syncTimer();
 render();
+
+['pointerdown','touchstart','keydown'].forEach(eventName => {
+  window.addEventListener(eventName, unlockAudioPlayback, { passive:true });
+});
 
 if ('serviceWorker' in navigator) {
   let refreshingForUpdate = false;
