@@ -155,7 +155,7 @@ const medalRules = {
 };
 
 function medalChallenges(id){
-  return [...baseChallenges, ...state.custom].filter(c => c.medal === id);
+  return [...baseChallenges, ...state.custom].filter(c => !(id === 'djup' && c.id === 'egenfisk') && c.medal === id);
 }
 function isShopItemDone(item){
   return item.repeatable ? boughtAmount(item.id) > 0 : !!state.bought[item.id];
@@ -175,7 +175,11 @@ function medalChecklist(id){
   }));
   return [...rules, ...shop, ...challenges];
 }
-function directUnlocks(){ return { djup: !!state.done.egenfisk }; }
+function directUnlocks(){
+  return {
+    djup: !!state.done.egenfisk || !!((state.bought.fisketill || state.bought.metspo || state.bought.kastspo) && boughtAmount('fiskelina') > 0 && state.done.fisk && state.done.spöhållare)
+  };
+}
 function medalUnlocked(id){
   if(directUnlocks()[id]) return true;
   const checklist = medalChecklist(id);
@@ -278,8 +282,8 @@ function boughtAmount(id){
   return typeof value === 'number' && Number.isFinite(value) ? Math.max(0, value) : (value ? 1 : 0);
 }
 function buy(id,cost){ if(state.bought[id])return; if(state.score<cost){ toast('Inte råd'); return; } state.score-=cost; state.bought[id]=true; autoUpdateMedals(); save(); render(); playSoundEffect(TRANSACTION_SOUND_SRC, transactionSoundTemplate); toast('Köpt'); }
-function buyByUnit(id, unitCost){
-  const input = document.getElementById(`${id}-qty`);
+function buyByUnit(id, unitCost, inputId = `${id}-qty`){
+  const input = document.getElementById(inputId);
   const item = shopItems.find(shopItem => shopItem.id === id);
   const qty = parseInt(input?.value, 10);
   const quantityPrompt = item?.quantityPrompt || 'Ange antal';
@@ -451,13 +455,15 @@ function itemRequirementCard(item){
   const amount = boughtAmount(item.id);
   const ok = isShopItemDone(item);
   if(item.repeatable){
+    const inputId = `quest-${item.id}-qty`;
     return `<div class="card challenge ${ok?'bought':''}">
       <div>
         <div class="name ${ok?'done':''}">${escapeHtml(item.name)}</div>
         <div class="small">${item.unitCost} poäng per ${item.unitLabel}${ok?` – köpt ${amount} ${item.unitLabel}`:''}</div>
       </div>
-      <div style="display:grid;gap:6px">
-        <div class="small">Kan köpas flera gånger</div>
+      <div style="display:grid;grid-template-columns:90px auto;gap:8px;align-items:center">
+        <input id="${inputId}" type="number" min="1" step="1" value="1" aria-label="${escapeHtml(item.name)} antal ${item.unitLabel}" />
+        <button onclick="buyByUnit('${item.id}',${item.unitCost},'${inputId}')">${escapeHtml(item.buyLabel || 'Köp')}</button>
       </div>
     </div>`;
   }
@@ -493,9 +499,10 @@ function questBlock(id, allChallenges){
   const title = medalInfo[id][0];
   const isDone = !!state.medals[id];
   const rules = medalRules[id] || [];
-  const direct = id === 'djup' && state.done.egenfisk;
+  const direct = id === 'djup' && directUnlocks().djup;
+  const altDjupUnlock = (state.bought.fisketill || state.bought.metspo || state.bought.kastspo) && boughtAmount('fiskelina') > 0 && state.done.fisk && state.done.spöhållare;
   const reqHtml = rules.map(r=>`<div class="req ${r.ok()?'ok':''}">${r.ok()?'✓':'○'} ${escapeHtml(r.label)}</div>`).join('')
-    + (id==='djup' ? `<div class="req ${direct?'ok':''}">${direct?'✓':'○'} Direkt upplåsning: fånga fisk med egentillverkat redskap</div>` : '');
+    + (id==='djup' ? `<div class="req ${state.done.egenfisk?'ok':''}">${state.done.egenfisk?'✓':'○'} Direkt upplåsning: fånga fisk med egentillverkat redskap</div><div class="req ${altDjupUnlock?'ok':''}">${altDjupUnlock?'✓':'○'} Alternativ upplåsning: köpt en fiskegrej, köpt minst 1 meter fiskelina, fångat en fisk och byggt en fungerande fiskespöhållare</div>` : '');
   const shopHtml = shopItems.filter(i=>i.medal===id).map(itemRequirementCard).join('');
   const challengesHtml = allChallenges.filter(c=>c.medal===id).map(challengeCard).join('');
   return `<div class="questBlock">
