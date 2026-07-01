@@ -93,15 +93,17 @@ const baseChallenges = [
 
 const events = [
   'Kasta macka – 1 poäng per studs',
-  'Drick en öl på 30 sekunder',
-  'Bygg pilbåge och träffa target',
-  'Yxkast mot stubbe – träffa markerad zon',
-  'Survivor Quiz – svara rätt på 5 överlevnadsfrågor',
-  'Lucky Shot – kasta en kotte genom en ring eller hink'
+  'Drick en öl på 30 sekunder – 5 poäng',
+  'Yxkast mot stubbe – 5 poäng vid träff, tre försök',
+  'Survivor Quiz – 1 poäng per rätt fråga',
+  'Alex quiz – hur väl känner du din fru? 1 poäng per fråga',
+  'Lucky Shot – kasta en kotte i en hink eller kastrull 10 meter bort, 3 poäng'
 ];
 
 const shopItems = [
   {id:'kniv', medal:'skytt', name:'🗡️ Kniv', cost:10},
+  {id:'luftgevar', medal:'skytt', name:'🔫 Luftgevär', cost:15},
+  {id:'luftgevarsskott', medal:'skytt', name:'🎯 Luftgevärsskott (10 st)', cost:5},
   {id:'yxa', medal:'borg', name:'🪓 Yxa', cost:10},
   {id:'snore', medal:'borg', name:'🪢 Rep', cost:5},
   {id:'tandstal', medal:'eld', name:'🔥 Tändstål', cost:5},
@@ -142,6 +144,8 @@ const medalRules = {
     {label:'Byggt en stol av naturmaterial', ok:()=>!!state.done.stol}
   ],
   skytt: [
+    {label:'Köpt luftgevär', ok:()=>!!state.bought.luftgevar},
+    {label:'Köpt luftgevärsskott', ok:()=>!!state.bought.luftgevarsskott},
     {label:'Byggt pilbåge och träffat tavla', ok:()=>!!state.done.pilbåge},
     {label:'Tillverkat ett fungerande spjut', ok:()=>!!state.done.spjut},
     {label:'Träffat en majsburk med luftgevär från 20 meters avstånd', ok:()=>!!state.done.majsburk},
@@ -149,11 +153,32 @@ const medalRules = {
   ]
 };
 
+function medalChallenges(id){
+  return [...baseChallenges, ...state.custom].filter(c => c.medal === id);
+}
+function isShopItemDone(item){
+  return item.repeatable ? boughtAmount(item.id) > 0 : !!state.bought[item.id];
+}
+function medalChecklist(id){
+  const rules = (medalRules[id] || []).map((rule, index) => ({
+    key:`rule:${id}:${index}`,
+    ok:rule.ok
+  }));
+  const shop = shopItems.filter(item => item.medal === id).map(item => ({
+    key:`shop:${item.id}`,
+    ok:() => isShopItemDone(item)
+  }));
+  const challenges = medalChallenges(id).map(challenge => ({
+    key:`challenge:${challenge.id}`,
+    ok:() => !!state.done[challenge.id]
+  }));
+  return [...rules, ...shop, ...challenges];
+}
 function directUnlocks(){ return { djup: !!state.done.egenfisk }; }
 function medalUnlocked(id){
   if(directUnlocks()[id]) return true;
-  const rules = medalRules[id] || [];
-  return rules.length > 0 && rules.every(r => r.ok());
+  const checklist = medalChecklist(id);
+  return checklist.length > 0 && checklist.every(entry => entry.ok());
 }
 function autoUpdateMedals(){
   Object.keys(medalInfo).forEach(id=>{
@@ -345,7 +370,7 @@ function hardReset(){ if(confirm('Nollställa allt?')){ localStorage.removeItem(
 
 function itemRequirementCard(item){
   const amount = boughtAmount(item.id);
-  const ok = item.repeatable ? amount > 0 : !!state.bought[item.id];
+  const ok = isShopItemDone(item);
   if(item.repeatable){
     return `<div class="card challenge ${ok?'bought':''}">
       <div>
@@ -380,10 +405,10 @@ function challengeCard(c){
   </div>`;
 }
 function questProgress(id){
-  const rules = medalRules[id] || [];
-  const done = rules.filter(r=>r.ok()).length;
-  const direct = directUnlocks()[id];
-  return direct ? 'Direkt upplåst' : `${done} / ${rules.length}`;
+  if(directUnlocks()[id]) return 'Direkt upplåst';
+  const checklist = medalChecklist(id);
+  const done = checklist.filter(entry => entry.ok()).length;
+  return `${done} / ${checklist.length}`;
 }
 function questBlock(id, allChallenges){
   const title = medalInfo[id][0];
