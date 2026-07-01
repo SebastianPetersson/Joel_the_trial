@@ -180,6 +180,59 @@ function medalUnlocked(id){
   const checklist = medalChecklist(id);
   return checklist.length > 0 && checklist.every(entry => entry.ok());
 }
+function getPentagonVertices(size = 320, radius = 118){
+  const center = size / 2;
+  return Array.from({ length: 5 }, (_, index) => {
+    const angle = (-90 + (index * 72)) * (Math.PI / 180);
+    return {
+      x: center + Math.cos(angle) * radius,
+      y: center + Math.sin(angle) * radius
+    };
+  });
+}
+function renderMedalPentagon(ids){
+  const size = 320;
+  const center = size / 2;
+  const vertices = getPentagonVertices(size, 118);
+  const labelPoints = getPentagonVertices(size, 148);
+  const outline = vertices.map(point => `${point.x},${point.y}`).join(' ');
+  const slices = ids.map((id, index) => {
+    const current = vertices[index];
+    const next = vertices[(index + 1) % vertices.length];
+    const icon = escapeHtml(medalInfo[id][0].split(' ')[0]);
+    const labelPoint = labelPoints[index];
+    return `
+      <g class="medalSliceGroup">
+        <polygon class="medalSlice ${state.medals[id] ? 'on' : ''}" points="${center},${center} ${current.x},${current.y} ${next.x},${next.y}" />
+        <text class="medalSliceLabel ${state.medals[id] ? 'on' : ''}" x="${labelPoint.x}" y="${labelPoint.y}" text-anchor="middle" dominant-baseline="middle">${icon}</text>
+      </g>`;
+  }).join('');
+
+  return `
+    <div class="medalPentagonCard">
+      <div class="small medalIntro">Fem delar. Fem medaljer. När en medalj klaras tänds dess del av sigillet.</div>
+      <div class="medalPentagonWrap">
+        <svg class="medalPentagon" viewBox="0 0 ${size} ${size}" aria-label="Medaljöversikt">
+          ${slices}
+          <polygon class="medalOutline" points="${outline}" />
+          <circle class="medalCore" cx="${center}" cy="${center}" r="38"></circle>
+          <text class="medalCoreText" x="${center}" y="${center - 6}" text-anchor="middle">MEDALJER</text>
+          <text class="medalCoreSub" x="${center}" y="${center + 16}" text-anchor="middle">${ids.filter(id => state.medals[id]).length}/${ids.length}</text>
+        </svg>
+      </div>
+      <div class="medalLegend">
+        ${ids.map(id => `
+          <div class="medalLegendItem ${state.medals[id] ? 'on' : ''}">
+            <div class="medalLegendTop">
+              <span class="medalLegendName">${escapeHtml(medalInfo[id][0])}</span>
+              <span class="questStatus ${state.medals[id] ? 'done' : ''}">${state.medals[id] ? 'Upplåst ✓' : questProgress(id)}</span>
+            </div>
+            <div class="small">${escapeHtml(medalInfo[id][1])}</div>
+          </div>
+        `).join('')}
+      </div>
+    </div>`;
+}
 function autoUpdateMedals(){
   Object.keys(medalInfo).forEach(id=>{
     const was = !!state.medals[id];
@@ -489,15 +542,7 @@ function render(){
       <button ${state.bought[i.id]?'disabled':''} onclick="buy('${i.id}',${i.cost})">${state.bought[i.id]?'Köpt':'Köp'}</button>
     </div>`;
   }).join('');
-  document.getElementById('medalList').innerHTML=ids.map(id=>{
-    const reqs = (medalRules[id]||[]).map(r=>`<div class="req ${r.ok()?'ok':''}">${r.ok()?'✓':'○'} ${escapeHtml(r.label)}</div>`).join('')
-      + (id==='djup'?`<div class="req ${state.done.egenfisk?'ok':''}">${state.done.egenfisk?'✓':'○'} Direkt upplåsning: fånga fisk med egentillverkat redskap</div>`:'');
-    return `<div class="medal ${state.medals[id]?'unlocked':''}">
-      <div class="name">${escapeHtml(medalInfo[id][0])}</div><div class="small">${escapeHtml(medalInfo[id][1])}</div>
-      <div class="reqList">${reqs}</div>
-      <br><div class="questStatus ${state.medals[id]?'done':''}">${state.medals[id]?'Automatiskt upplåst ✓':questProgress(id)}</div>
-    </div>`;
-  }).join('');
+  document.getElementById('medalList').innerHTML = renderMedalPentagon(ids);
   const sel=document.getElementById('intervalSelect'); if(sel) sel.value=String(state.interval);
   save();
 }

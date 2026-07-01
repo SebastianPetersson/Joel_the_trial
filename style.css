@@ -45,9 +45,25 @@ h3{font-size:18px;margin:16px 0 8px;color:#e6c77e}
   border:1px solid var(--line);border-radius:18px;background:
   linear-gradient(145deg,#21180e,#100d09 65%,#090806);box-shadow:0 12px 32px #0009,inset 0 0 0 1px #ffffff08;
 }
-.scoreCard{margin:14px 0;padding:15px;border-color:#6f5525}
+.scoreCard{position:relative;margin:14px 0;padding:15px 15px 52px;border-color:#6f5525}
 .scoreRow{display:flex;justify-content:space-between;align-items:center;gap:12px}
 .score{font-family:system-ui,sans-serif;font-size:62px;font-weight:1000;color:var(--gold);line-height:.9}
+.settingsGear{
+  position:absolute;
+  right:14px;
+  bottom:14px;
+  width:42px;
+  height:42px;
+  display:grid;
+  place-items:center;
+  padding:0;
+  border-radius:999px;
+  font-size:22px;
+  line-height:1;
+  background:#1a140d;
+  border-color:#6f5525;
+  color:var(--gold)
+}
 .small{font-family:system-ui,sans-serif;font-size:13px;color:var(--muted)}
 .progress{margin-top:12px;padding-top:12px;border-top:1px solid var(--line)}
 .medalDots{display:flex;gap:6px;flex-wrap:wrap;margin-top:7px}
@@ -85,8 +101,99 @@ select,input{width:100%;background:#0d0b08;border-color:var(--line)}
 .shopItem{display:flex;justify-content:space-between;align-items:center;gap:10px}
 .bought{opacity:.58}.bought .name:after{content:"  ✓";color:var(--gold)}
 .medals{display:grid;grid-template-columns:1fr;gap:10px}
-.medal{padding:13px}
-.medal.unlocked{border-color:var(--gold);background:linear-gradient(145deg,#2c1f0f,#111)}
+.medalPentagonCard{
+  border:1px solid #6f5525;
+  border-radius:22px;
+  padding:18px;
+  background:
+    radial-gradient(circle at 50% 30%, #3d2c12 0, transparent 38%),
+    linear-gradient(145deg,#21180e,#100d09 65%,#090806);
+  box-shadow:0 18px 40px #0009,inset 0 0 0 1px #ffffff08;
+}
+.medalIntro{text-align:center;margin-bottom:14px}
+.medalPentagonWrap{
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  padding:10px 0 18px;
+}
+.medalPentagon{
+  width:min(100%, 360px);
+  height:auto;
+  overflow:visible;
+  filter:drop-shadow(0 10px 28px #000c);
+}
+.medalSlice{
+  fill:#17120d;
+  stroke:#5a4320;
+  stroke-width:3;
+  transition:fill .25s ease, filter .25s ease, stroke .25s ease;
+}
+.medalSlice.on{
+  fill:#c79b3a;
+  stroke:#f0cf84;
+  filter:drop-shadow(0 0 10px #c79b3a88) drop-shadow(0 0 24px #c79b3a55);
+}
+.medalOutline{
+  fill:none;
+  stroke:#ecd7a1;
+  stroke-width:4;
+  opacity:.9;
+}
+.medalCore{
+  fill:#100c08;
+  stroke:#c79b3a;
+  stroke-width:3;
+}
+.medalCoreText{
+  fill:#e7d2a1;
+  font-family:"Cinzel", Georgia, "Times New Roman", serif;
+  font-size:15px;
+  font-weight:700;
+  letter-spacing:1.8px;
+}
+.medalCoreSub{
+  fill:var(--gold);
+  font-family:system-ui,sans-serif;
+  font-size:24px;
+  font-weight:900;
+}
+.medalSliceLabel{
+  fill:#8e7e63;
+  font-size:22px;
+  transition:fill .25s ease, filter .25s ease;
+}
+.medalSliceLabel.on{
+  fill:#fff3cf;
+  filter:drop-shadow(0 0 8px #fff2b3aa);
+}
+.medalLegend{
+  display:grid;
+  gap:10px;
+}
+.medalLegendItem{
+  border:1px solid var(--line);
+  border-radius:16px;
+  padding:12px;
+  background:#110d08;
+}
+.medalLegendItem.on{
+  border-color:#c79b3a;
+  background:linear-gradient(145deg,#2a1d0d,#110d08);
+  box-shadow:inset 0 0 0 1px #f7db9f22;
+}
+.medalLegendTop{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:10px;
+  margin-bottom:6px;
+}
+.medalLegendName{
+  font-size:17px;
+  font-weight:800;
+  color:var(--ink);
+}
 .reqList{font-family:system-ui,sans-serif;display:grid;gap:7px;margin-top:10px}
 .req{padding:8px;border:1px solid var(--line);border-radius:12px;background:#0d0b08;color:var(--muted)}
 .req.ok{border-color:#6f5525;color:#e6c77e;background:#21180e}
@@ -105,4 +212,5 @@ select,input{width:100%;background:#0d0b08;border-color:var(--line)}
 @media (max-width: 560px){
   h1{font-size:28px;letter-spacing:1.2px}
   .sub{font-size:12px;letter-spacing:.9px}
+  .medalLegendTop{align-items:flex-start;flex-direction:column}
 }
