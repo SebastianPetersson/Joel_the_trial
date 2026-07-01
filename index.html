@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="sv">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#090806" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Prövningen" />
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="apple-touch-icon" href="icon-192.png" />
+  <title>Joel: Prövningen</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <h1>Joel: Prövningen</h1>
+      <div class="sub">Fem medaljer. Ett vapen. Ingen återvändo.</div>
+    </header>
+
+    <div class="scoreCard">
+      <div class="scoreRow">
+        <div>
+          <div class="small">Joels poäng</div>
+          <div class="score" id="score">0</div>
+        </div>
+        <div class="grid">
+          <button onclick="addPoints(1)">+1</button><button onclick="addPoints(5)">+5</button>
+          <button onclick="addPoints(10)">+10</button><button class="btnRed" onclick="addPoints(-5)">-5</button>
+        </div>
+      </div>
+      <div class="progress">
+        <div class="small" id="medalProgress">0 / 5 medaljer</div>
+        <div class="medalDots" id="medalDots"></div>
+      </div>
+    </div>
+
+    <div class="tabs">
+      <div class="tab active" onclick="showTab('challenges', this)">Medaljquest</div>
+      <div class="tab" onclick="showTab('events', this)">Special event</div>
+      <div class="tab" onclick="showTab('shop', this)">Shop</div>
+      <div class="tab" onclick="showTab('medals', this)">Medaljer</div>
+      <div class="tab" onclick="showTab('settings', this)">Inställningar</div>
+    </div>
+
+    <section id="challenges" class="activeSec">
+      <div class="controls">
+        <select id="medalFilter" onchange="renderChallenges()">
+          <option value="all">Alla medaljer</option>
+          <option value="eld">🔥 Eldmästare</option>
+          <option value="djup">🎣 Djupets Konung</option>
+          <option value="våg">🛶 Våghärskare</option>
+          <option value="borg">🏕️ Borgmästare</option>
+          <option value="skytt">🎯 Prickskytten</option>
+          <option value="misc">Övriga challenges</option>
+        </select>
+        <select id="stateFilter" onchange="renderChallenges()">
+          <option value="all">Alla</option>
+          <option value="open">Ej klara</option>
+          <option value="done">Klara</option>
+        </select>
+        <input class="full" id="searchBox" oninput="renderChallenges()" placeholder="Sök challenge..." />
+      </div>
+      <div id="challengeList"></div>
+    </section>
+
+    <section id="events">
+      <div class="card">
+        <div class="small">Nästa special event</div>
+        <div class="timer" id="timer">30:00</div>
+        <div class="grid">
+          <button class="btnGreen" onclick="startTimer()">Starta</button>
+          <button onclick="pauseTimer()">Pausa</button>
+          <button onclick="resetTimer()">Nollställ</button>
+          <button class="btnGold" onclick="triggerEvent(true)">Slumpa nu</button>
+        </div>
+      </div>
+      <div class="eventBox">
+        <div class="small">Aktuell special event</div>
+        <div class="eventName" id="currentEvent">Ingen ännu</div>
+      </div>
+      <div id="eventList"></div>
+    </section>
+
+    <section id="shop"></section>
+
+    <section id="medals">
+      <div class="medals" id="medalList"></div>
+    </section>
+
+    <section id="settings">
+      <div class="card">
+        <div class="name">Lägg till egen challenge</div><br>
+        <select id="newMedal">
+          <option value="misc">Övriga challenges</option>
+          <option value="eld">🔥 Eldmästare</option>
+          <option value="djup">🎣 Djupets Konung</option>
+          <option value="våg">🛶 Våghärskare</option>
+          <option value="borg">🏕️ Borgmästare</option>
+          <option value="skytt">🎯 Prickskytten</option>
+        </select><br><br>
+        <input id="newName" placeholder="Challenge..." /><br><br>
+        <input id="newPts" type="number" placeholder="Poäng, t.ex. 5" /><br><br>
+        <button class="btnGold" onclick="addCustomChallenge()">Lägg till</button>
+      </div>
+      <div class="card">
+        <div class="name">Timerlängd</div><br>
+        <select id="intervalSelect" onchange="changeInterval()">
+          <option value="1800">30 minuter</option>
+          <option value="3600">60 minuter</option>
+          <option value="900">15 minuter</option>
+        </select>
+      </div>
+      <div class="card">
+        <button class="btnRed" onclick="hardReset()">Nollställ hela spelet</button>
+      </div>
+      <div class="card">
+        <div class="name">Installera som app</div>
+        <p class="small">På iPhone: öppna sidan i Safari → Dela → Lägg till på hemskärmen.</p>
+      </div>
+    </section>
+  </div>
+
+  <div class="footerBar">
+    <div class="footerInner">
+      <button onclick="addPoints(1)">+1 p</button>
+      <button class="btnGold" onclick="triggerEvent(true)">Event</button>
+      <button onclick="showTabById('shop')">Shop</button>
+    </div>
+  </div>
+
+  <div class="modal" id="eventModal" onclick="closeModal()">
+    <div class="modalCard" onclick="event.stopPropagation()">
+      <div class="modalTitle">Special Event</div>
+      <div class="rune">⚔️</div>
+      <div class="hint">Skogen har talat...</div>
+      <div class="finalText" id="modalEvent">...</div>
+      <button class="btnGold" onclick="closeModal()">Acceptera prövningen</button>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

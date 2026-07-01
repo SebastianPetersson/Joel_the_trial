@@ -1,0 +1,87 @@
+:root{
+  --bg:#090806; --ink:#f3e7cf; --muted:#a99a7d; --gold:#c79b3a; --blood:#7b1f1c;
+  --green:#506b3b; --panel:#15120d; --panel2:#20190f; --line:#3a2b18; --black:#050403;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{
+  margin:0;color:var(--ink);font-family:Georgia, "Times New Roman", serif;
+  background:
+    radial-gradient(circle at 20% 0%, #3a2b18 0, transparent 34%),
+    radial-gradient(circle at 80% 10%, #23120f 0, transparent 30%),
+    linear-gradient(180deg,#090806,#0e0b08 60%,#050403);
+  min-height:100svh;
+}
+body:before{
+  content:"";position:fixed;inset:0;pointer-events:none;opacity:.16;mix-blend-mode:screen;
+  background-image:linear-gradient(45deg,transparent 48%,#fff1 49%,transparent 50%),radial-gradient(#fff2 1px,transparent 1px);
+  background-size:38px 38px, 9px 9px;
+}
+.wrap{max-width:760px;margin:auto;padding:14px 12px 96px}
+header{
+  position:sticky;top:0;z-index:10;margin:0 -12px;padding:12px 12px 10px;
+  background:linear-gradient(#090806f2,#090806cc);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)
+}
+h1{font-size:30px;margin:0;text-transform:uppercase;letter-spacing:1px;text-shadow:0 2px 0 #000}
+h2{font-size:21px;margin:20px 0 8px;color:var(--gold);text-transform:uppercase;letter-spacing:.8px}
+h3{font-size:18px;margin:16px 0 8px;color:#e6c77e}
+.sub{font-family:system-ui,sans-serif;color:var(--muted);font-size:13px;margin-top:3px}
+.scoreCard,.card,.medal,.modalCard,.questBlock{
+  border:1px solid var(--line);border-radius:18px;background:
+  linear-gradient(145deg,#21180e,#100d09 65%,#090806);box-shadow:0 12px 32px #0009,inset 0 0 0 1px #ffffff08;
+}
+.scoreCard{margin:14px 0;padding:15px;border-color:#6f5525}
+.scoreRow{display:flex;justify-content:space-between;align-items:center;gap:12px}
+.score{font-family:system-ui,sans-serif;font-size:62px;font-weight:1000;color:var(--gold);line-height:.9}
+.small{font-family:system-ui,sans-serif;font-size:13px;color:var(--muted)}
+.progress{margin-top:12px;padding-top:12px;border-top:1px solid var(--line)}
+.medalDots{display:flex;gap:6px;flex-wrap:wrap;margin-top:7px}
+.dot{padding:6px 8px;border-radius:999px;background:#0d0b08;border:1px solid var(--line);font-family:system-ui,sans-serif;font-size:13px;color:var(--muted)}
+.dot.on{border-color:var(--gold);color:var(--gold);background:#2a1d0d}
+button,select,input{
+  font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+  border:1px solid #5b4422;background:#21180f;color:var(--ink);border-radius:12px;padding:11px 12px;font-weight:800;font-size:15px
+}
+button:active{transform:scale(.985)}
+button:disabled{opacity:.45}
+.btnGold{background:#5b4118;border-color:#bc8d2d}
+.btnRed{background:#481816;border-color:#8c302b}
+.btnGreen{background:#26341c;border-color:#5f7a43}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.tabs{display:flex;gap:8px;overflow:auto;padding:8px 0 12px}
+.tab{white-space:nowrap;padding:9px 12px;border-radius:999px;border:1px solid var(--line);color:var(--muted);background:#0d0b08;font-family:system-ui,sans-serif;font-weight:800}
+.tab.active{color:var(--gold);border-color:var(--gold);background:#24190d}
+section{display:none}.activeSec{display:block}
+.card{padding:13px;margin:10px 0}
+.questBlock{padding:13px;margin:12px 0;border-color:#4a371d}
+.questHead{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.questTitle{font-size:22px;font-weight:900;color:var(--gold)}
+.questStatus{font-family:system-ui,sans-serif;font-size:13px;border:1px solid var(--line);padding:6px 8px;border-radius:999px;color:var(--muted)}
+.questStatus.done{border-color:var(--gold);color:var(--gold);background:#2a1d0d}
+.challenge{display:flex;gap:10px;align-items:flex-start;justify-content:space-between}
+.name{font-size:17px;font-weight:800}
+.done{opacity:.45;text-decoration:line-through}
+.controls{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:10px 0}
+.full{grid-column:1/-1;width:100%}
+select,input{width:100%;background:#0d0b08;border-color:var(--line)}
+.timer{font-family:system-ui,sans-serif;font-size:54px;font-weight:1000;letter-spacing:1px;color:var(--gold);text-align:center;margin:10px 0;text-shadow:0 0 20px #c79b3a44}
+.eventBox{border:1px dashed var(--gold);border-radius:16px;padding:14px;text-align:center;background:#1d140b;margin:10px 0}
+.eventName{font-size:23px;font-weight:900;color:#fff}
+.shopItem{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.bought{opacity:.58}.bought .name:after{content:"  ✓";color:var(--gold)}
+.medals{display:grid;grid-template-columns:1fr;gap:10px}
+.medal{padding:13px}
+.medal.unlocked{border-color:var(--gold);background:linear-gradient(145deg,#2c1f0f,#111)}
+.reqList{font-family:system-ui,sans-serif;display:grid;gap:7px;margin-top:10px}
+.req{padding:8px;border:1px solid var(--line);border-radius:12px;background:#0d0b08;color:var(--muted)}
+.req.ok{border-color:#6f5525;color:#e6c77e;background:#21180e}
+.footerBar{position:fixed;left:0;right:0;bottom:0;z-index:20;background:#090806ee;border-top:1px solid var(--line);backdrop-filter:blur(10px);padding:10px 12px calc(10px + env(safe-area-inset-bottom))}
+.footerInner{max-width:760px;margin:auto;display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+.toast{position:fixed;left:50%;top:38%;transform:translate(-50%,-50%);z-index:50;background:#20170e;border:1px solid var(--gold);border-radius:18px;padding:18px 22px;color:var(--gold);font-family:system-ui,sans-serif;font-size:30px;font-weight:1000;box-shadow:0 18px 60px #000;animation:pop 1.2s forwards;pointer-events:none;text-align:center}
+@keyframes pop{0%{opacity:0;transform:translate(-50%,-30%) scale(.8)}15%{opacity:1;transform:translate(-50%,-50%) scale(1.05)}100%{opacity:0;transform:translate(-50%,-80%) scale(.95)}}
+.modal{position:fixed;inset:0;z-index:40;background:#000c;display:none;align-items:center;justify-content:center;padding:18px}
+.modal.show{display:flex}
+.modalCard{max-width:520px;width:100%;text-align:center;padding:22px;border-color:var(--gold)}
+.modalTitle{font-size:28px;color:var(--gold);text-transform:uppercase;letter-spacing:1px}
+.rune{font-size:38px;margin:8px 0}
+.finalText{font-size:22px;font-weight:900;margin:14px 0}
+.hint{font-family:system-ui,sans-serif;color:var(--muted);font-size:13px}
