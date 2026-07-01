@@ -499,8 +499,6 @@ function renderChallenges(){
   let all=[...baseChallenges,...state.custom];
   const f=document.getElementById('medalFilter')?.value || 'all';
   const stateF=document.getElementById('stateFilter')?.value || 'all';
-  const q=(document.getElementById('searchBox')?.value || '').toLowerCase();
-  if(q) all=all.filter(c=>c.name.toLowerCase().includes(q));
   if(stateF==='done') all=all.filter(c=>state.done[c.id]);
   if(stateF==='open') all=all.filter(c=>!state.done[c.id]);
 
