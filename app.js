@@ -48,17 +48,17 @@ const baseChallenges = [
   {id:'koka', medal:'eld', pts:5, name:'Koka upp vatten över eld'},
   {id:'grillpinne', medal:'eld', pts:3, name:'Bygg en fungerande grillpinne'},
 
-  {id:'fisk', medal:'djup', pts:5, name:'Fånga 1 fisk'},
-  {id:'spöhållare', medal:'djup', pts:5, name:'Bygg en fungerande fiskespöshållare'},
-  {id:'egenfisk', medal:'djup', pts:10, name:'Fånga en fisk med egentillverkat redskap'},
+  {id:'fisk', medal:'djup', pts:7, name:'Fånga 1 fisk'},
+  {id:'spöhållare', medal:'djup', pts:7, name:'Bygg en fungerande fiskespöshållare'},
+  {id:'egenfisk', medal:'djup', pts:15, name:'Fånga en fisk med egentillverkat redskap'},
 
   {id:'ölro', medal:'våg', pts:5, name:'Åk eka med en öppnad öl till Sebbe utan att spilla'},
   {id:'stekspade', medal:'våg', pts:10, name:'Ro eka till ö med stekspade'},
   {id:'karta', medal:'våg', pts:5, name:'Rita en karta över området'},
 
-  {id:'vindskydd', medal:'borg', pts:10, name:'Gör ett vindskydd'},
-  {id:'trefot', medal:'borg', pts:10, name:'Bygg en trefot över elden'},
-  {id:'stol', medal:'borg', pts:5, name:'Bygg en stol av naturmaterial'},
+  {id:'vindskydd', medal:'borg', pts:8, name:'Gör ett vindskydd'},
+  {id:'trefot', medal:'borg', pts:6, name:'Bygg en trefot över elden'},
+  {id:'stol', medal:'borg', pts:4, name:'Bygg en stol av naturmaterial'},
   {id:'gardin', medal:'borg', pts:10, name:'Fixa egna kläder från gardin'},
 
   {id:'pilbåge', medal:'skytt', pts:10, name:'Bygg en pilbåge och träffa en tavla'},
@@ -66,27 +66,27 @@ const baseChallenges = [
   {id:'majsburk', medal:'skytt', pts:10, name:'Träffa en majsburk med luftgevär från 20 meters avstånd'},
   {id:'mygga', medal:'skytt', pts:10, name:'Fånga en levande mygga med fingrarna, Zen Master Style'},
 
-  {id:'bär', medal:'misc', pts:3, name:'Plocka 20 bär'},
+  {id:'bär', medal:'misc', pts:1, name:'Plocka 20 bär'},
   {id:'skor', medal:'misc', pts:3, name:'Gå 10 min med skor på fel fot'},
-  {id:'kalsong', medal:'misc', pts:3, name:'En hand innanför kallingarna tills nästa poäng'},
-  {id:'fjäder', medal:'misc', pts:3, name:'Hitta en fjäder'},
+  {id:'kalsong', medal:'misc', pts:2, name:'En hand innanför kallingarna tills nästa poäng'},
+  {id:'fjäder', medal:'misc', pts:2, name:'Hitta en fjäder'},
   {id:'pirat', medal:'misc', pts:3, name:'Prata som en pirat i 10 minuter'},
-  {id:'baklänges', medal:'misc', pts:3, name:'Gå baklänges i 100 meter'},
+  {id:'baklänges', medal:'misc', pts:3, name:'Gå baklänges 100 steg'},
   {id:'pinnegevär', medal:'misc', pts:3, name:'Håll en pinne som gevär i 10 minuter'},
-  {id:'huk', medal:'misc', pts:3, name:'Sitt på huk i 2 minuter'},
-  {id:'kapten', medal:'misc', pts:3, name:'Byt namn till Kapten Joel tills nästa poäng'},
-  {id:'kottar', medal:'misc', pts:3, name:'Samla 10 kottar'},
-  {id:'blad', medal:'misc', pts:3, name:'Hitta tre olika sorters blad'},
-  {id:'barkbåt', medal:'misc', pts:3, name:'Gör en barkbåt som flyter i minst 30 sekunder'},
-  {id:'knopar', medal:'misc', pts:4, name:'Knyt tre olika knopar'},
+  {id:'huk', medal:'misc', pts:2, name:'Sitt på huk i 2 minuter'},
+  {id:'kapten', medal:'misc', pts:1, name:'Byt namn till Kapten Joel tills nästa poäng'},
+  {id:'kottar', medal:'misc', pts:1, name:'Samla 10 kottar'},
+  {id:'blad', medal:'misc', pts:2, name:'Hitta tre olika sorters blad'},
+  {id:'barkbåt', medal:'misc', pts:4, name:'Gör en barkbåt som flyter i minst 30 sekunder'},
+  {id:'knopar', medal:'misc', pts:3, name:'Knyt tre olika knopar'},
   {id:'träsked', medal:'misc', pts:4, name:'Tillverka en träsked eller smörkniv'},
-  {id:'djurspår', medal:'misc', pts:4, name:'Hitta ett djurspår'},
+  {id:'djurspår', medal:'misc', pts:3, name:'Hitta ett djurspår'},
   {id:'halsband', medal:'misc', pts:4, name:'Gör ett halsband av naturmaterial'},
-  {id:'stenröse', medal:'misc', pts:4, name:'Bygg ett litet stenröse'},
-  {id:'ätbart', medal:'misc', pts:4, name:'Hitta något ätbart i naturen, måste godkännas'},
+  {id:'stenröse', medal:'misc', pts:1, name:'Bygg ett litet stenröse'},
+  {id:'ätbart', medal:'misc', pts:2, name:'Hitta något ätbart i naturen, måste godkännas'},
   {id:'kantareller', medal:'misc', pts:5, name:'Samla 10 kantareller, 1 gång'},
   {id:'sommarbanger', medal:'misc', pts:5, name:'Skriv och uppträd en sommarbanger'},
-  {id:'visselpipa', medal:'misc', pts:5, name:'Gör en visselpipa av ett blad'},
+  {id:'visselpipa', medal:'misc', pts:4, name:'Gör en visselpipa av ett blad'},
   {id:'högsta', medal:'misc', pts:3, name:'Hitta den högsta punkten i området'}
 ];
 
@@ -101,25 +101,39 @@ const events = [
 ];
 
 const shopItems = [
-  {id:'kniv', medal:'skytt', name:'🗡️ Kniv', cost:10},
-  {id:'luftgevar', medal:'skytt', name:'🔫 Luftgevär', cost:15},
-  {id:'luftgevarsskott', medal:'skytt', name:'🎯 Luftgevärsskott (10 st)', unitCost:5, unitLabel:'omgångar', repeatable:true, buyLabel:'Köp omgång', quantityPrompt:'Ange antal omgångar'},
-  {id:'yxa', medal:'borg', name:'🪓 Yxa', cost:10},
-  {id:'snore', medal:'borg', name:'🪢 Rep', cost:5},
-  {id:'tandstal', medal:'eld', name:'🔥 Tändstål', cost:5},
-  {id:'ved', medal:'eld', name:'🪵 Ved', cost:10},
-  {id:'fisketill', medal:'djup', name:'🪱 Fisketillbehör', cost:5},
-  {id:'fiskelina', medal:'djup', name:'🧵 Fiskelina', unitCost:1, unitLabel:'meter', repeatable:true, buyLabel:'Köp meter', quantityPrompt:'Ange antal meter'},
-  {id:'metspo', medal:'djup', name:'🎣 Metspö + tillbehör', cost:15},
-  {id:'kastspo', medal:'djup', name:'🎣 Kastspö', cost:20},
-  {id:'stekspade-shop', medal:'våg', name:'🍳 Stekspade', cost:1},
-  {id:'mystery', medal:'misc', name:'❓ Mystery lootbox', cost:25},
-  {id:'mygg', medal:'misc', name:'🦟 Myggmedel', cost:20},
-  {id:'kompass', medal:'misc', name:'🧭 Kompass', cost:3},
-  {id:'gaffel', medal:'misc', name:'🍴 Gaffel', cost:20},
-  {id:'a4', medal:'misc', name:'📜 Ett A4', cost:5},
-  {id:'gardin-shop', medal:'misc', name:'🪟 Gardin', cost:10},
-  {id:'poncho', medal:'misc', name:'🌧️ Poncho', cost:5}
+  {id:'kniv', medal:'skytt', category:'skytte', name:'Kniv', cost:10},
+  {id:'luftgevar', medal:'skytt', category:'skytte', name:'Luftgevär', cost:12},
+  {id:'luftgevarsskott', medal:'skytt', category:'skytte', name:'Luftgevärsskott (10 st)', unitCost:3, unitLabel:'omgångar', repeatable:true, buyLabel:'Köp omgång', quantityPrompt:'Ange antal omgångar'},
+  {id:'yxa', medal:'borg', category:'bygge', name:'Yxa', cost:10},
+  {id:'snore', medal:'borg', category:'bygge', name:'Rep', cost:5},
+  {id:'tandstal', medal:'eld', category:'eld', name:'Tändstål', cost:5},
+  {id:'ved', medal:'eld', category:'eld', name:'Ved', cost:10},
+  {id:'fisketill', medal:'djup', category:'fiske', name:'Fisketillbehör', cost:5},
+  {id:'fiskelina', medal:'djup', category:'fiske', name:'Fiskelina', unitCost:1, unitLabel:'meter', repeatable:true, buyLabel:'Köp meter', quantityPrompt:'Ange antal meter'},
+  {id:'metspo', medal:'djup', category:'fiske', name:'Metspö + tillbehör', cost:15},
+  {id:'kastspo', medal:'djup', category:'fiske', name:'Kastspö', cost:20},
+  {id:'stekspade-shop', medal:'våg', category:'kok', name:'Stekspade', cost:5},
+  {id:'kastrull-shop', medal:'våg', category:'kok', name:'Kastrull', cost:5},
+  {id:'ol-shop', medal:'misc', category:'dryck', name:'En öl', cost:4},
+  {id:'shot-shop', medal:'misc', category:'dryck', name:'En shot att dela ut', cost:5},
+  {id:'mystery', medal:'misc', category:'ovrigt', name:'Mystery lootbox', cost:25},
+  {id:'mygg', medal:'misc', category:'utrustning', name:'Myggmedel', cost:20},
+  {id:'kompass', medal:'misc', category:'utrustning', name:'Kompass', cost:3},
+  {id:'gaffel', medal:'misc', category:'kok', name:'Gaffel', cost:20},
+  {id:'a4', medal:'misc', category:'ovrigt', name:'Ett A4', cost:5},
+  {id:'gardin-shop', medal:'misc', category:'utrustning', name:'Gardin', cost:10},
+  {id:'poncho', medal:'misc', category:'utrustning', name:'Poncho', cost:5}
+];
+
+const shopCategories = [
+  {id:'eld', label:'Eld & Läger'},
+  {id:'fiske', label:'Fiske'},
+  {id:'skytte', label:'Skytte'},
+  {id:'bygge', label:'Bygge & Verktyg'},
+  {id:'kok', label:'Kök & Redskap'},
+  {id:'dryck', label:'Dryck'},
+  {id:'utrustning', label:'Utrustning'},
+  {id:'ovrigt', label:'Övrigt'}
 ];
 
 const medalRules = {
@@ -475,7 +489,29 @@ function itemRequirementCard(item){
     <div style="display:grid;gap:6px">
       <button ${ok?'disabled':''} onclick="buy('${item.id}',${item.cost})">${ok?'Köpt':'Köp'}</button>
     </div>
-  </div>`;
+    </div>`;
+}
+function renderShopCard(item, inputPrefix = 'shop'){
+  if(item.repeatable){
+    const amount = boughtAmount(item.id);
+    const inputId = `${inputPrefix}-${item.id}-qty`;
+    return `
+    <div class="card shopItem repeatableItem ${amount > 0 ? 'stocked' : ''}">
+      <div>
+        <div class="name">${escapeHtml(item.name)}</div>
+        <div class="small">${item.unitCost} poäng per ${item.unitLabel}${amount > 0 ? ` – köpt ${amount} ${item.unitLabel}` : ''}</div>
+      </div>
+      <div style="display:grid;grid-template-columns:90px auto;gap:8px;align-items:center">
+        <input id="${inputId}" type="number" min="1" step="1" value="1" aria-label="${escapeHtml(item.name)} antal ${item.unitLabel}" />
+        <button onclick="buyByUnit('${item.id}',${item.unitCost},'${inputId}')">${escapeHtml(item.buyLabel || 'Köp')}</button>
+      </div>
+    </div>`;
+  }
+  return `
+    <div class="card shopItem ${state.bought[item.id]?'bought':''}">
+      <div><div class="name">${escapeHtml(item.name)}</div><div class="small">${item.cost} poäng ${state.bought[item.id]?'– köpt':''}</div></div>
+      <button ${state.bought[item.id]?'disabled':''} onclick="buy('${item.id}',${item.cost})">${state.bought[item.id]?'Köpt':'Köp'}</button>
+    </div>`;
 }
 function challengeCard(c){
   return `<div class="card challenge">
@@ -552,27 +588,16 @@ function render(){
   document.getElementById('medalDots').innerHTML=ids.map(id=>`<span class="dot ${state.medals[id]?'on':''}">${medalInfo[id][0].split(' ')[0]}</span>`).join('');
   renderChallenges();
   document.getElementById('eventList').innerHTML='<h2>Eventpool</h2>'+events.map(event=>`<div class="card ${event.oneTime && eventUsed(event.id) ? 'usedEvent' : ''}"><div class="name">${escapeHtml(event.label)}</div><div class="small">${event.oneTime ? (eventUsed(event.id) ? 'Engångsevent – redan slumpat' : 'Engångsevent – kan bara slumpas 1 gång') : 'Kan slumpas flera gånger'}</div></div>`).join('');
-  document.getElementById('shop').innerHTML='<h2>Överlevnadsshop</h2>'+shopItems.map(i=>{
-    if(i.repeatable){
-      const amount = boughtAmount(i.id);
-      return `
-    <div class="card shopItem repeatableItem ${amount > 0 ? 'stocked' : ''}">
-      <div>
-        <div class="name">${escapeHtml(i.name)}</div>
-        <div class="small">${i.unitCost} poäng per ${i.unitLabel}${amount > 0 ? ` – köpt ${amount} ${i.unitLabel}` : ''}</div>
-      </div>
-      <div style="display:grid;grid-template-columns:90px auto;gap:8px;align-items:center">
-        <input id="${i.id}-qty" type="number" min="1" step="1" value="1" aria-label="${escapeHtml(i.name)} antal ${i.unitLabel}" />
-        <button onclick="buyByUnit('${i.id}',${i.unitCost})">${escapeHtml(i.buyLabel || 'Köp')}</button>
+  document.getElementById('shop').innerHTML='<h2>Överlevnadsshop</h2><div class="shopGrid">'+shopCategories.map(category=>{
+    const items = shopItems.filter(item => item.category === category.id);
+    if(!items.length) return '';
+    return `<div class="shopCategory">
+      <h3>${escapeHtml(category.label)}</h3>
+      <div class="shopCategoryItems">
+        ${items.map(item => renderShopCard(item, `shop-${category.id}`)).join('')}
       </div>
     </div>`;
-    }
-    return `
-    <div class="card shopItem ${state.bought[i.id]?'bought':''}">
-      <div><div class="name">${escapeHtml(i.name)}</div><div class="small">${i.cost} poäng ${state.bought[i.id]?'– köpt':''}</div></div>
-      <button ${state.bought[i.id]?'disabled':''} onclick="buy('${i.id}',${i.cost})">${state.bought[i.id]?'Köpt':'Köp'}</button>
-    </div>`;
-  }).join('');
+  }).join('')+'</div>';
   document.getElementById('medalList').innerHTML = renderMedalPentagon(ids);
   const sel=document.getElementById('intervalSelect'); if(sel) sel.value=String(state.interval);
   save();
