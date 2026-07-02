@@ -69,14 +69,14 @@ const baseChallenges = [
 
   {id:'bär', medal:'misc', pts:1, name:'Plocka 20 bär'},
   {id:'skor', medal:'misc', pts:3, name:'Gå 10 min med skor på fel fot'},
-  {id:'kalsong', medal:'misc', pts:2, name:'En hand innanför kallingarna tills nästa poäng'},
+  {id:'kalsong', medal:'misc', pts:2, name:'En hand innanför kallingarna tills nästa mynt'},
   {id:'fjäder', medal:'misc', pts:2, name:'Hitta en fjäder'},
   {id:'pirat', medal:'misc', pts:3, name:'Prata som en pirat i 10 minuter'},
   {id:'baklänges', medal:'misc', pts:1, name:'Gå baklänges 100 meter'},
   {id:'pinnegevär', medal:'misc', pts:2, name:'Håll en pinne som ett gevär i 10 minuter'},
   {id:'huk', medal:'misc', pts:1, name:'Sitt på huk i 2 minuter'},
-  {id:'kapten', medal:'misc', pts:1, name:'Byt namn till Kapten Joel tills nästa poäng'},
-  {id:'enben', medal:'misc', pts:3, name:'Hoppa på 1 ben i 5 minuter. Extrapoäng om denna görs samtidigt som prata som pirat och Kapten Joel'},
+  {id:'kapten', medal:'misc', pts:1, name:'Byt namn till Kapten Joel tills nästa mynt'},
+  {id:'enben', medal:'misc', pts:3, name:'Hoppa på 1 ben i 5 minuter. Bonusmynt om denna görs samtidigt som prata som pirat och Kapten Joel'},
   {id:'kottar', medal:'misc', pts:1, name:'Samla 10 kottar'},
   {id:'blad', medal:'misc', pts:2, name:'Hitta tre olika sorters blad'},
   {id:'barkbåt', medal:'misc', pts:3, name:'Gör en barkbåt som flyter i minst 30 sekunder'},
@@ -93,13 +93,13 @@ const baseChallenges = [
 ];
 
 const events = [
-  {id:'macka', label:'Kasta macka – 1 poäng per studs'},
-  {id:'ol', label:'Drick en öl på 30 sekunder – 5 poäng'},
-  {id:'yxkast', label:'Yxkast mot stubbe – 5 poäng vid träff, tre försök'},
-  {id:'survivor-quiz', label:'Survivor Quiz – 1 poäng per rätt fråga', oneTime:true},
-  {id:'alex-quiz', label:'Alex quiz – hur väl känner du din fru? 1 poäng per fråga', oneTime:true},
-  {id:'lucky-shot', label:'Lucky Shot – kasta en kotte i en hink eller kastrull 10 meter bort, 3 poäng'},
-  {id:'freestyle-rap', label:'Freestyle rap – 5 poäng', oneTime:true}
+  {id:'macka', label:'Kasta macka – 1 mynt per studs'},
+  {id:'ol', label:'Drick en öl på 30 sekunder – 5 mynt'},
+  {id:'yxkast', label:'Yxkast mot stubbe – 5 mynt vid träff, tre försök'},
+  {id:'survivor-quiz', label:'Survivor Quiz – 1 mynt per rätt fråga', oneTime:true},
+  {id:'alex-quiz', label:'Alex quiz – hur väl känner du din fru? 1 mynt per fråga', oneTime:true},
+  {id:'lucky-shot', label:'Lucky Shot – kasta en kotte i en hink eller kastrull 10 meter bort, 3 mynt'},
+  {id:'freestyle-rap', label:'Freestyle rap – 5 mynt', oneTime:true}
 ];
 
 const shopItems = [
@@ -121,6 +121,7 @@ const shopItems = [
   {id:'mystery', medal:'misc', category:'ovrigt', name:'Mystery lootbox', unitCost:25, unitLabel:'st', repeatable:true, buyLabel:'Köp', quantityPrompt:'Ange antal'},
   {id:'mygg', medal:'misc', category:'utrustning', name:'Myggmedel', cost:15},
   {id:'kompass', medal:'misc', category:'utrustning', name:'Kompass', cost:3},
+  {id:'naltrad', medal:'misc', category:'utrustning', name:'Nål och tråd', cost:3},
   {id:'gaffel', medal:'misc', category:'kok', name:'Gaffel', cost:3},
   {id:'a4', medal:'misc', category:'ovrigt', name:'Ett A4', unitCost:5, unitLabel:'st', repeatable:true, buyLabel:'Köp', quantityPrompt:'Ange antal'},
   {id:'poncho', medal:'misc', category:'utrustning', name:'Poncho', unitCost:5, unitLabel:'st', repeatable:true, maxPurchases:4, buyLabel:'Köp', quantityPrompt:'Ange antal'}
@@ -183,7 +184,7 @@ function medalChecklist(id){
 }
 function directUnlocks(){
   return {
-    djup: !!state.done.egenfisk || !!((state.bought.fisketill || state.bought.metspo || state.bought.kastspo) && boughtAmount('fiskelina') > 0 && state.done.fisk && state.done.spöhållare)
+    djup: !!state.done.egenfisk
   };
 }
 function medalUnlocked(id){
@@ -278,10 +279,10 @@ function escapeHtml(value){
   })[char]);
 }
 function toast(t){ const d=document.createElement('div'); d.className='toast'; d.textContent=t; document.body.appendChild(d); setTimeout(()=>d.remove(),1200); }
-function addPoints(n){ state.score=Math.max(0,state.score+n); save(); render(); if(n>0)toast('+'+n+' poäng'); }
+function addPoints(n){ state.score=Math.max(0,state.score+n); save(); render(); if(n>0)toast('+'+n+' mynt'); }
 function showTab(id, el){ document.querySelectorAll('section').forEach(s=>s.classList.remove('activeSec')); document.getElementById(id).classList.add('activeSec'); document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active')); if(el)el.classList.add('active'); }
 function showTabById(id){ const tab=[...document.querySelectorAll('.tab')].find(t=>t.getAttribute('onclick')?.includes(id)); showTab(id, tab); }
-function complete(id, pts){ if(state.done[id])return; state.done[id]=true; state.score+=pts; autoUpdateMedals(); save(); render(); playSoundEffect(CHALLENGE_COMPLETE_SRC, challengeCompleteTemplate); toast('+'+pts+' poäng'); }
+function complete(id, pts){ if(state.done[id])return; state.done[id]=true; state.score+=pts; autoUpdateMedals(); save(); render(); playSoundEffect(CHALLENGE_COMPLETE_SRC, challengeCompleteTemplate); toast('+'+pts+' mynt'); }
 function undo(id, pts){ if(!state.done[id])return; state.done[id]=false; state.score=Math.max(0,state.score-pts); autoUpdateMedals(); save(); render(); }
 function boughtAmount(id){
   const value = state.bought[id];
@@ -477,7 +478,7 @@ function itemRequirementCard(item){
     return `<div class="card challenge ${ok?'bought':''}">
       <div>
         <div class="name ${ok?'done':''}">${escapeHtml(item.name)}</div>
-        <div class="small">${item.unitCost} poäng per ${item.unitLabel}${ok?` – köpt ${amount} ${item.unitLabel}`:''}${Number.isFinite(remaining) ? ` – max ${item.maxPurchases}` : ''}</div>
+        <div class="small">${item.unitCost} mynt per ${item.unitLabel}${ok?` – köpt ${amount} ${item.unitLabel}`:''}${Number.isFinite(remaining) ? ` – max ${item.maxPurchases}` : ''}</div>
       </div>
       <div style="display:grid;grid-template-columns:90px auto;gap:8px;align-items:center">
         <input id="${inputId}" type="number" min="1" step="1" value="1" ${Number.isFinite(remaining) ? `max="${remaining}"` : ''} ${maxed ? 'disabled' : ''} aria-label="${escapeHtml(item.name)} antal ${item.unitLabel}" />
@@ -488,7 +489,7 @@ function itemRequirementCard(item){
   return `<div class="card challenge ${ok?'bought':''}">
     <div>
       <div class="name ${ok?'done':''}">${escapeHtml(item.name)}</div>
-      <div class="small">Shopkrav – ${item.cost} poäng ${ok?'– köpt':''}</div>
+      <div class="small">Shopkrav – ${item.cost} mynt ${ok?'– köpt':''}</div>
     </div>
     <div style="display:grid;gap:6px">
       <button ${ok?'disabled':''} onclick="buy('${item.id}',${item.cost})">${ok?'Köpt':'Köp'}</button>
@@ -505,7 +506,7 @@ function renderShopCard(item, inputPrefix = 'shop'){
     <div class="card shopItem repeatableItem ${amount > 0 ? 'stocked' : ''}">
       <div>
         <div class="name">${escapeHtml(item.name)}</div>
-        <div class="small">${item.unitCost} poäng per ${item.unitLabel}${amount > 0 ? ` – köpt ${amount} ${item.unitLabel}` : ''}${Number.isFinite(remaining) ? ` – max ${item.maxPurchases}` : ''}</div>
+        <div class="small">${item.unitCost} mynt per ${item.unitLabel}${amount > 0 ? ` – köpt ${amount} ${item.unitLabel}` : ''}${Number.isFinite(remaining) ? ` – max ${item.maxPurchases}` : ''}</div>
       </div>
       <div style="display:grid;grid-template-columns:90px auto;gap:8px;align-items:center">
         <input id="${inputId}" type="number" min="1" step="1" value="1" ${Number.isFinite(remaining) ? `max="${remaining}"` : ''} ${maxed ? 'disabled' : ''} aria-label="${escapeHtml(item.name)} antal ${item.unitLabel}" />
@@ -515,7 +516,7 @@ function renderShopCard(item, inputPrefix = 'shop'){
   }
   return `
     <div class="card shopItem ${state.bought[item.id]?'bought':''}">
-      <div><div class="name">${escapeHtml(item.name)}</div><div class="small">${item.cost} poäng ${state.bought[item.id]?'– köpt':''}</div></div>
+      <div><div class="name">${escapeHtml(item.name)}</div><div class="small">${item.cost} mynt ${state.bought[item.id]?'– köpt':''}</div></div>
       <button ${state.bought[item.id]?'disabled':''} onclick="buy('${item.id}',${item.cost})">${state.bought[item.id]?'Köpt':'Köp'}</button>
     </div>`;
 }
@@ -523,7 +524,7 @@ function challengeCard(c){
   return `<div class="card challenge">
     <div>
       <div class="name ${state.done[c.id]?'done':''}">${escapeHtml(c.name)}</div>
-      <div class="small">${c.pts} poäng</div>
+      <div class="small">${c.pts} mynt</div>
     </div>
     <div style="display:grid;gap:6px">
       <button class="btnGold" onclick="complete('${c.id}',${c.pts})">Klar</button>
@@ -542,9 +543,8 @@ function questBlock(id, allChallenges){
   const isDone = !!state.medals[id];
   const rules = medalRules[id] || [];
   const direct = id === 'djup' && directUnlocks().djup;
-  const altDjupUnlock = (state.bought.fisketill || state.bought.metspo || state.bought.kastspo) && boughtAmount('fiskelina') > 0 && state.done.fisk && state.done.spöhållare;
   const reqHtml = rules.map(r=>`<div class="req ${r.ok()?'ok':''}">${r.ok()?'✓':'○'} ${escapeHtml(r.label)}</div>`).join('')
-    + (id==='djup' ? `<div class="req ${state.done.egenfisk?'ok':''}">${state.done.egenfisk?'✓':'○'} Direkt upplåsning: fånga fisk med egentillverkat redskap</div><div class="req ${altDjupUnlock?'ok':''}">${altDjupUnlock?'✓':'○'} Alternativ upplåsning: köpt en fiskegrej, köpt minst 1 meter fiskelina, fångat en fisk och byggt en fungerande fiskespöhållare</div>` : '');
+    + (id==='djup' ? `<div class="req ${state.done.egenfisk?'ok':''}">${state.done.egenfisk?'✓':'○'} Direkt upplåsning: fånga fisk med egentillverkat redskap</div>` : '');
   const shopHtml = shopItems.filter(i=>i.medal===id).map(itemRequirementCard).join('');
   const challengesHtml = allChallenges.filter(c=>c.medal===id).map(challengeCard).join('');
   return `<div class="questBlock">
