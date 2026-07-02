@@ -638,7 +638,7 @@ function render(){
   const ids=Object.keys(medalInfo);
   const unlocked=ids.filter(id=>state.medals[id]).length;
   document.getElementById('medalProgress').textContent=`${unlocked} / ${ids.length} medaljer`;
-  document.getElementById('medalDots').innerHTML=ids.map(id=>`<span class="dot ${state.medals[id]?'on':''}">${medalInfo[id][0].split(' ')[0]}</span>`).join('');
+  document.getElementById('medalDots').innerHTML=ids.map(id=>`<span class="dot ${state.medals[id]?'on':''}"><span class="medalDotEmoji">${medalInfo[id][0].split(' ')[0]}</span></span>`).join('');
   renderChallenges();
   document.getElementById('eventList').innerHTML='<h2>Eventpool</h2>'+events.map(event=>`<div class="card ${event.oneTime && eventUsed(event.id) ? 'usedEvent' : ''}"><div class="name">${escapeHtml(event.label)}</div><div class="small">${event.oneTime ? (eventUsed(event.id) ? 'Engångsevent – redan slumpat' : 'Engångsevent – kan bara slumpas 1 gång') : 'Kan slumpas flera gånger'}</div></div>`).join('');
   document.getElementById('shop').innerHTML='<h2>Överlevnadsshop</h2><div class="shopGrid">'+shopCategories.map(category=>{

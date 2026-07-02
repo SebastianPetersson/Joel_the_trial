@@ -77,7 +77,8 @@ h3{font-size:18px;margin:16px 0 8px;color:#e6c77e}
 .small{font-family:system-ui,sans-serif;font-size:13px;color:var(--muted)}
 .progress{margin-top:12px;padding-top:12px;border-top:1px solid var(--line)}
 .medalDots{display:flex;gap:6px;flex-wrap:wrap;margin-top:7px}
-.dot{padding:6px 8px;border-radius:999px;background:#0d0b08;border:1px solid var(--line);font-family:system-ui,sans-serif;font-size:26px;line-height:1;color:var(--muted)}
+.dot{padding:6px 8px;border-radius:999px;background:#0d0b08;border:1px solid var(--line);font-family:system-ui,sans-serif;font-size:13px;line-height:1;color:var(--muted);display:grid;place-items:center;min-width:46px;min-height:46px}
+.medalDotEmoji{display:block;font-size:34px;line-height:1}
 .dot.on{border-color:var(--gold);color:var(--gold);background:#2a1d0d}
 button,select,input{
   font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
