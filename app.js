@@ -103,7 +103,7 @@ const events = [
 ];
 
 const shopItems = [
-  {id:'kniv', medal:'skytt', category:'skytte', name:'Kniv', cost:10},
+  {id:'kniv', medal:'skytt', category:'bygge', name:'Kniv', cost:10},
   {id:'luftgevar', medal:'skytt', category:'skytte', name:'Luftgevär', cost:12},
   {id:'luftgevarsskott', medal:'skytt', category:'skytte', name:'Luftgevärsskott (10 st)', unitCost:3, unitLabel:'omgångar', repeatable:true, buyLabel:'Köp omgång', quantityPrompt:'Ange antal omgångar'},
   {id:'yxa', medal:'borg', category:'bygge', name:'Yxa', cost:10},
