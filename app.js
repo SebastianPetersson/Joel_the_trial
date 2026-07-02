@@ -18,6 +18,8 @@ const EVENT_FANFARE_SRC = './fanfare.wav';
 const CHALLENGE_COMPLETE_SRC = './klar.wav';
 const TRANSACTION_SOUND_SRC = './transaction.mp3';
 const WRONG_ANSWER_SOUND_SRC = './wrong_answer.wav';
+const WINNER_IMAGE_SRC = './Joel_vinnare.png';
+const WINNER_SONG_SRC = './Vinnarlåt.wav';
 function createAudioTemplate(src){
   if(typeof Audio === 'undefined') return null;
   const audio = new Audio(src);
@@ -30,11 +32,14 @@ const eventFanfareTemplate = createAudioTemplate(EVENT_FANFARE_SRC);
 const challengeCompleteTemplate = createAudioTemplate(CHALLENGE_COMPLETE_SRC);
 const transactionSoundTemplate = createAudioTemplate(TRANSACTION_SOUND_SRC);
 const wrongAnswerSoundTemplate = createAudioTemplate(WRONG_ANSWER_SOUND_SRC);
-const audioTemplates = [eventFanfareTemplate, challengeCompleteTemplate, transactionSoundTemplate, wrongAnswerSoundTemplate].filter(Boolean);
+const winnerSongTemplate = createAudioTemplate(WINNER_SONG_SRC);
+const audioTemplates = [eventFanfareTemplate, challengeCompleteTemplate, transactionSoundTemplate, wrongAnswerSoundTemplate, winnerSongTemplate].filter(Boolean);
 let fanfareTimeoutId = null;
 let activeFanfareAudios = [];
 let activeEffectAudios = [];
 let audioPlaybackUnlocked = false;
+let activeWinnerAudio = null;
+let allowVictoryCelebration = false;
 
 const medalInfo = {
   eld: ['🔥 Eldmästare','Du tämjde elden.'],
@@ -259,12 +264,18 @@ function renderMedalPentagon(ids){
     </div>`;
 }
 function autoUpdateMedals(){
-  Object.keys(medalInfo).forEach(id=>{
+  const medalIds = Object.keys(medalInfo);
+  const allUnlockedBefore = medalIds.length > 0 && medalIds.every(id => !!state.medals[id]);
+  medalIds.forEach(id=>{
     const was = !!state.medals[id];
     const now = medalUnlocked(id);
     state.medals[id] = now;
     if(now && !was) setTimeout(()=>toast(medalInfo[id][0] + ' upplåst!'), 100);
   });
+  const allUnlockedNow = medalIds.length > 0 && medalIds.every(id => !!state.medals[id]);
+  if(allowVictoryCelebration && allUnlockedNow && !allUnlockedBefore){
+    celebrateVictory();
+  }
 }
 function save(){ localStorage.setItem('joelSurvivalPWA', JSON.stringify(state)); }
 function escapeHtml(value){
@@ -378,6 +389,22 @@ function playSoundEffect(src, template){
     activeEffectAudios = activeEffectAudios.filter(item => item !== audio);
   }, { once:true });
 }
+function stopWinnerSong(){
+  if(!activeWinnerAudio) return;
+  activeWinnerAudio.pause();
+  activeWinnerAudio.currentTime = 0;
+  activeWinnerAudio = null;
+}
+function playWinnerSong(){
+  if(typeof Audio === 'undefined') return;
+  stopWinnerSong();
+  const audio = createAudioFromTemplate(winnerSongTemplate, WINNER_SONG_SRC);
+  activeWinnerAudio = audio;
+  startAudioFromBeginning(audio);
+  audio.addEventListener('ended', () => {
+    if(activeWinnerAudio === audio) activeWinnerAudio = null;
+  }, { once:true });
+}
 function playEventFanfare(remainingPlays = 3){
   if(typeof Audio === 'undefined' || remainingPlays <= 0) return;
   stopEventFanfare();
@@ -455,6 +482,17 @@ function triggerEvent(isManual = false){
   if(navigator.vibrate) navigator.vibrate([250,100,250]);
 }
 function closeModal(){ document.getElementById('eventModal').classList.remove('show'); }
+function celebrateVictory(){
+  const winnerModal = document.getElementById('winnerModal');
+  const winnerImage = document.getElementById('winnerImage');
+  if(winnerImage) winnerImage.src = WINNER_IMAGE_SRC;
+  if(winnerModal) winnerModal.classList.add('show');
+  playWinnerSong();
+}
+function closeWinnerModal(){
+  document.getElementById('winnerModal').classList.remove('show');
+  stopWinnerSong();
+}
 function addCustomChallenge(){
   const name=document.getElementById('newName').value.trim();
   const pts=parseInt(document.getElementById('newPts').value,10);
@@ -627,6 +665,7 @@ window.addEventListener('focus', () => {
 });
 syncTimer();
 render();
+allowVictoryCelebration = true;
 
 ['pointerdown','touchstart','keydown'].forEach(eventName => {
   window.addEventListener(eventName, unlockAudioPlayback, { passive:true });

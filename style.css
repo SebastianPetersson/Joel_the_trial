@@ -99,6 +99,15 @@ select,input{width:100%;background:#0d0b08;border-color:var(--line)}
 .eventBox{border:1px dashed var(--gold);border-radius:16px;padding:14px;text-align:center;background:#1d140b;margin:10px 0}
 .eventName{font-size:23px;font-weight:900;color:#fff}
 .usedEvent{opacity:.58;border-color:#5b4422}
+.winnerCard{max-width:420px;text-align:center}
+.winnerImage{
+  display:block;
+  width:min(100%, 320px);
+  margin:12px auto 18px;
+  border-radius:18px;
+  border:1px solid #6f5525;
+  box-shadow:0 18px 40px #0008, 0 0 24px #c79b3a33;
+}
 .shopItem{display:flex;justify-content:space-between;align-items:center;gap:10px}
 .shopGrid{column-count:2;column-gap:14px}
 .shopCategory{

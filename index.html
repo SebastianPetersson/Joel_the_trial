@@ -135,6 +135,14 @@
     </div>
   </div>
 
+  <div class="modal" id="winnerModal" onclick="closeWinnerModal()">
+    <div class="modalCard winnerCard" onclick="event.stopPropagation()">
+      <div class="modalTitle">Alla medaljer upplåsta</div>
+      <img id="winnerImage" class="winnerImage" src="./Joel_vinnare.png" alt="Joel som vinnare" />
+      <button class="btnGold" onclick="closeWinnerModal()">Fira vidare</button>
+    </div>
+  </div>
+
   <script src="app.js"></script>
 </body>
 </html>

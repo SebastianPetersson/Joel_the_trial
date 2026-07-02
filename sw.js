@@ -1,12 +1,14 @@
-const CACHE_NAME = 'joel-provningen-v4';
+const CACHE_NAME = 'joel-provningen-v5';
 const ASSETS = [
   './',
   './index.html',
   './style.css',
   './app.js',
   './fanfare.wav',
+  './Joel_vinnare.png',
   './klar.wav',
   './transaction.mp3',
+  './Vinnarlåt.wav',
   './wrong_answer.wav',
   './manifest.webmanifest',
   './icon-192.png',
