@@ -58,10 +58,9 @@ const baseChallenges = [
   {id:'stekspade', medal:'våg', pts:10, name:'Ro eka till ö med stekspade'},
   {id:'karta', medal:'våg', pts:5, name:'Rita en karta över området'},
 
-  {id:'vindskydd', medal:'borg', pts:8, name:'Gör ett vindskydd'},
+  {id:'vindskydd', medal:'borg', pts:8, name:'Gör eller hitta ett vindskydd'},
   {id:'trefot', medal:'borg', pts:6, name:'Bygg en trefot över elden'},
   {id:'stol', medal:'borg', pts:4, name:'Bygg en stol av naturmaterial'},
-  {id:'gardin', medal:'borg', pts:10, name:'Fixa egna kläder från gardin'},
 
   {id:'pilbåge', medal:'skytt', pts:10, name:'Bygg en pilbåge och träffa en tavla'},
   {id:'spjut', medal:'skytt', pts:5, name:'Tillverka ett fungerande spjut'},
@@ -73,14 +72,15 @@ const baseChallenges = [
   {id:'kalsong', medal:'misc', pts:2, name:'En hand innanför kallingarna tills nästa poäng'},
   {id:'fjäder', medal:'misc', pts:2, name:'Hitta en fjäder'},
   {id:'pirat', medal:'misc', pts:3, name:'Prata som en pirat i 10 minuter'},
-  {id:'baklänges', medal:'misc', pts:3, name:'Gå baklänges 100 steg'},
-  {id:'pinnegevär', medal:'misc', pts:3, name:'Håll en pinne som gevär i 10 minuter'},
-  {id:'huk', medal:'misc', pts:2, name:'Sitt på huk i 2 minuter'},
+  {id:'baklänges', medal:'misc', pts:1, name:'Gå baklänges 100 meter'},
+  {id:'pinnegevär', medal:'misc', pts:2, name:'Håll en pinne som ett gevär i 10 minuter'},
+  {id:'huk', medal:'misc', pts:1, name:'Sitt på huk i 2 minuter'},
   {id:'kapten', medal:'misc', pts:1, name:'Byt namn till Kapten Joel tills nästa poäng'},
+  {id:'enben', medal:'misc', pts:3, name:'Hoppa på 1 ben i 5 minuter. Extrapoäng om denna görs samtidigt som prata som pirat och Kapten Joel'},
   {id:'kottar', medal:'misc', pts:1, name:'Samla 10 kottar'},
   {id:'blad', medal:'misc', pts:2, name:'Hitta tre olika sorters blad'},
-  {id:'barkbåt', medal:'misc', pts:4, name:'Gör en barkbåt som flyter i minst 30 sekunder'},
-  {id:'knopar', medal:'misc', pts:3, name:'Knyt tre olika knopar'},
+  {id:'barkbåt', medal:'misc', pts:3, name:'Gör en barkbåt som flyter i minst 30 sekunder'},
+  {id:'knopar', medal:'misc', pts:4, name:'Knyt tre olika knopar'},
   {id:'träsked', medal:'misc', pts:4, name:'Tillverka en träsked eller smörkniv'},
   {id:'djurspår', medal:'misc', pts:3, name:'Hitta ett djurspår'},
   {id:'halsband', medal:'misc', pts:4, name:'Gör ett halsband av naturmaterial'},
@@ -88,7 +88,7 @@ const baseChallenges = [
   {id:'ätbart', medal:'misc', pts:2, name:'Hitta något ätbart i naturen, måste godkännas'},
   {id:'kantareller', medal:'misc', pts:5, name:'Samla 10 kantareller, 1 gång'},
   {id:'sommarbanger', medal:'misc', pts:5, name:'Skriv och uppträd en sommarbanger'},
-  {id:'visselpipa', medal:'misc', pts:4, name:'Gör en visselpipa av ett blad'},
+  {id:'visselpipa', medal:'misc', pts:2, name:'Gör en visselpipa av ett blad'},
   {id:'högsta', medal:'misc', pts:3, name:'Hitta den högsta punkten i området'}
 ];
 
@@ -116,15 +116,14 @@ const shopItems = [
   {id:'kastspo', medal:'djup', category:'fiske', name:'Kastspö', cost:20},
   {id:'stekspade-shop', medal:'våg', category:'kok', name:'Stekspade', cost:5},
   {id:'kastrull-shop', medal:'våg', category:'kok', name:'Kastrull', cost:5},
-  {id:'ol-shop', medal:'misc', category:'dryck', name:'En öl', cost:4},
-  {id:'shot-shop', medal:'misc', category:'dryck', name:'En shot att dela ut', cost:5},
-  {id:'mystery', medal:'misc', category:'ovrigt', name:'Mystery lootbox', cost:25},
-  {id:'mygg', medal:'misc', category:'utrustning', name:'Myggmedel', cost:20},
+  {id:'ol-shop', medal:'misc', category:'dryck', name:'En öl', unitCost:2, unitLabel:'st', repeatable:true, buyLabel:'Köp', quantityPrompt:'Ange antal'},
+  {id:'shot-shop', medal:'misc', category:'dryck', name:'En shot att dela ut', unitCost:3, unitLabel:'st', repeatable:true, buyLabel:'Köp', quantityPrompt:'Ange antal'},
+  {id:'mystery', medal:'misc', category:'ovrigt', name:'Mystery lootbox', unitCost:25, unitLabel:'st', repeatable:true, buyLabel:'Köp', quantityPrompt:'Ange antal'},
+  {id:'mygg', medal:'misc', category:'utrustning', name:'Myggmedel', cost:15},
   {id:'kompass', medal:'misc', category:'utrustning', name:'Kompass', cost:3},
-  {id:'gaffel', medal:'misc', category:'kok', name:'Gaffel', cost:20},
-  {id:'a4', medal:'misc', category:'ovrigt', name:'Ett A4', cost:5},
-  {id:'gardin-shop', medal:'misc', category:'utrustning', name:'Gardin', cost:10},
-  {id:'poncho', medal:'misc', category:'utrustning', name:'Poncho', cost:5}
+  {id:'gaffel', medal:'misc', category:'kok', name:'Gaffel', cost:3},
+  {id:'a4', medal:'misc', category:'ovrigt', name:'Ett A4', unitCost:5, unitLabel:'st', repeatable:true, buyLabel:'Köp', quantityPrompt:'Ange antal'},
+  {id:'poncho', medal:'misc', category:'utrustning', name:'Poncho', unitCost:5, unitLabel:'st', repeatable:true, maxPurchases:4, buyLabel:'Köp', quantityPrompt:'Ange antal'}
 ];
 
 const shopCategories = [
@@ -177,19 +176,10 @@ function isShopItemDone(item){
   return item.repeatable ? boughtAmount(item.id) > 0 : !!state.bought[item.id];
 }
 function medalChecklist(id){
-  const rules = (medalRules[id] || []).map((rule, index) => ({
+  return (medalRules[id] || []).map((rule, index) => ({
     key:`rule:${id}:${index}`,
     ok:rule.ok
   }));
-  const shop = shopItems.filter(item => item.medal === id).map(item => ({
-    key:`shop:${item.id}`,
-    ok:() => isShopItemDone(item)
-  }));
-  const challenges = medalChallenges(id).map(challenge => ({
-    key:`challenge:${challenge.id}`,
-    ok:() => !!state.done[challenge.id]
-  }));
-  return [...rules, ...shop, ...challenges];
 }
 function directUnlocks(){
   return {
@@ -297,6 +287,10 @@ function boughtAmount(id){
   const value = state.bought[id];
   return typeof value === 'number' && Number.isFinite(value) ? Math.max(0, value) : (value ? 1 : 0);
 }
+function remainingPurchases(item){
+  if(typeof item?.maxPurchases !== 'number') return Infinity;
+  return Math.max(0, item.maxPurchases - boughtAmount(item.id));
+}
 function buy(id,cost){ if(state.bought[id])return; if(state.score<cost){ playSoundEffect(WRONG_ANSWER_SOUND_SRC, wrongAnswerSoundTemplate); toast('Inte råd'); return; } state.score-=cost; state.bought[id]=true; autoUpdateMedals(); save(); render(); playSoundEffect(TRANSACTION_SOUND_SRC, transactionSoundTemplate); toast('Köpt'); }
 function buyByUnit(id, unitCost, inputId = `${id}-qty`){
   const input = document.getElementById(inputId);
@@ -304,6 +298,12 @@ function buyByUnit(id, unitCost, inputId = `${id}-qty`){
   const qty = parseInt(input?.value, 10);
   const quantityPrompt = item?.quantityPrompt || 'Ange antal';
   if(!Number.isInteger(qty) || qty <= 0){ toast(quantityPrompt); return; }
+  const remaining = remainingPurchases(item);
+  if(qty > remaining){
+    playSoundEffect(WRONG_ANSWER_SOUND_SRC, wrongAnswerSoundTemplate);
+    toast(remaining === 0 ? 'Max köpt' : `Max ${remaining} kvar`);
+    return;
+  }
   const totalCost = qty * unitCost;
   if(state.score < totalCost){ playSoundEffect(WRONG_ANSWER_SOUND_SRC, wrongAnswerSoundTemplate); toast('Inte råd'); return; }
   state.score -= totalCost;
@@ -472,14 +472,16 @@ function itemRequirementCard(item){
   const ok = isShopItemDone(item);
   if(item.repeatable){
     const inputId = `quest-${item.id}-qty`;
+    const remaining = remainingPurchases(item);
+    const maxed = remaining === 0;
     return `<div class="card challenge ${ok?'bought':''}">
       <div>
         <div class="name ${ok?'done':''}">${escapeHtml(item.name)}</div>
-        <div class="small">${item.unitCost} poäng per ${item.unitLabel}${ok?` – köpt ${amount} ${item.unitLabel}`:''}</div>
+        <div class="small">${item.unitCost} poäng per ${item.unitLabel}${ok?` – köpt ${amount} ${item.unitLabel}`:''}${Number.isFinite(remaining) ? ` – max ${item.maxPurchases}` : ''}</div>
       </div>
       <div style="display:grid;grid-template-columns:90px auto;gap:8px;align-items:center">
-        <input id="${inputId}" type="number" min="1" step="1" value="1" aria-label="${escapeHtml(item.name)} antal ${item.unitLabel}" />
-        <button onclick="buyByUnit('${item.id}',${item.unitCost},'${inputId}')">${escapeHtml(item.buyLabel || 'Köp')}</button>
+        <input id="${inputId}" type="number" min="1" step="1" value="1" ${Number.isFinite(remaining) ? `max="${remaining}"` : ''} ${maxed ? 'disabled' : ''} aria-label="${escapeHtml(item.name)} antal ${item.unitLabel}" />
+        <button ${maxed ? 'disabled' : ''} onclick="buyByUnit('${item.id}',${item.unitCost},'${inputId}')">${maxed ? 'Maxat' : escapeHtml(item.buyLabel || 'Köp')}</button>
       </div>
     </div>`;
   }
@@ -497,15 +499,17 @@ function renderShopCard(item, inputPrefix = 'shop'){
   if(item.repeatable){
     const amount = boughtAmount(item.id);
     const inputId = `${inputPrefix}-${item.id}-qty`;
+    const remaining = remainingPurchases(item);
+    const maxed = remaining === 0;
     return `
     <div class="card shopItem repeatableItem ${amount > 0 ? 'stocked' : ''}">
       <div>
         <div class="name">${escapeHtml(item.name)}</div>
-        <div class="small">${item.unitCost} poäng per ${item.unitLabel}${amount > 0 ? ` – köpt ${amount} ${item.unitLabel}` : ''}</div>
+        <div class="small">${item.unitCost} poäng per ${item.unitLabel}${amount > 0 ? ` – köpt ${amount} ${item.unitLabel}` : ''}${Number.isFinite(remaining) ? ` – max ${item.maxPurchases}` : ''}</div>
       </div>
       <div style="display:grid;grid-template-columns:90px auto;gap:8px;align-items:center">
-        <input id="${inputId}" type="number" min="1" step="1" value="1" aria-label="${escapeHtml(item.name)} antal ${item.unitLabel}" />
-        <button onclick="buyByUnit('${item.id}',${item.unitCost},'${inputId}')">${escapeHtml(item.buyLabel || 'Köp')}</button>
+        <input id="${inputId}" type="number" min="1" step="1" value="1" ${Number.isFinite(remaining) ? `max="${remaining}"` : ''} ${maxed ? 'disabled' : ''} aria-label="${escapeHtml(item.name)} antal ${item.unitLabel}" />
+        <button ${maxed ? 'disabled' : ''} onclick="buyByUnit('${item.id}',${item.unitCost},'${inputId}')">${maxed ? 'Maxat' : escapeHtml(item.buyLabel || 'Köp')}</button>
       </div>
     </div>`;
   }
