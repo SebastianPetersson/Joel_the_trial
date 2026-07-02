@@ -63,7 +63,6 @@ const baseChallenges = [
   {id:'stol', medal:'borg', pts:4, name:'Bygg en stol av naturmaterial'},
 
   {id:'pilbåge', medal:'skytt', pts:10, name:'Bygg en pilbåge och träffa en tavla'},
-  {id:'spjut', medal:'skytt', pts:5, name:'Tillverka ett fungerande spjut'},
   {id:'majsburk', medal:'skytt', pts:10, name:'Träffa en majsburk med luftgevär från 20 meters avstånd'},
   {id:'mygga', medal:'skytt', pts:10, name:'Fånga en levande mygga med fingrarna, Zen Master Style'},
 
@@ -164,7 +163,6 @@ const medalRules = {
     {label:'Köpt luftgevär', ok:()=>!!state.bought.luftgevar},
     {label:'Köpt luftgevärsskott', ok:()=>!!state.bought.luftgevarsskott},
     {label:'Byggt pilbåge och träffat tavla', ok:()=>!!state.done.pilbåge},
-    {label:'Tillverkat ett fungerande spjut', ok:()=>!!state.done.spjut},
     {label:'Träffat en majsburk med luftgevär från 20 meters avstånd', ok:()=>!!state.done.majsburk},
     {label:'Fångat en levande mygga med fingrarna', ok:()=>!!state.done.mygga}
   ]
