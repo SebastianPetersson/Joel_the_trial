@@ -55,7 +55,7 @@ h3{font-size:18px;margin:16px 0 8px;color:#e6c77e}
   font-weight:1000;
   line-height:.9;
 }
-.scoreLabel{color:var(--muted)}
+.scoreLabel{color:var(--muted);font-size:clamp(17px,3.5vw,31px)}
 .score{color:var(--gold)}
 .settingsGear{
   position:absolute;
