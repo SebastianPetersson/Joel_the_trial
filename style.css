@@ -110,7 +110,7 @@ select,input{width:100%;background:#0d0b08;border-color:var(--line)}
 }
 .shopItem{
   display:grid;
-  grid-template-columns:minmax(0,1fr) 186px;
+  grid-template-columns:minmax(0,1fr) 88px;
   align-items:start;
   gap:10px;
 }
@@ -118,9 +118,9 @@ select,input{width:100%;background:#0d0b08;border-color:var(--line)}
 .shopItemInfo .small{overflow-wrap:anywhere}
 .shopItemControls{justify-self:end}
 .repeatableControls{
-  width:186px;
+  width:88px;
   display:grid;
-  grid-template-columns:90px 88px;
+  grid-template-columns:1fr;
   gap:8px;
   align-items:center;
 }
