@@ -549,11 +549,11 @@ function renderShopCard(item, inputPrefix = 'shop'){
     const maxed = remaining === 0;
     return `
     <div class="card shopItem repeatableItem ${amount > 0 ? 'stocked' : ''}">
-      <div>
+      <div class="shopItemInfo">
         <div class="name">${escapeHtml(item.name)}</div>
         <div class="small">${item.unitCost} mynt per ${item.unitLabel}${amount > 0 ? ` – köpt ${amount} ${item.unitLabel}` : ''}${Number.isFinite(remaining) ? ` – max ${item.maxPurchases}` : ''}</div>
       </div>
-      <div style="display:grid;grid-template-columns:90px auto;gap:8px;align-items:center">
+      <div class="shopItemControls repeatableControls">
         <input id="${inputId}" type="number" min="1" step="1" value="1" ${Number.isFinite(remaining) ? `max="${remaining}"` : ''} ${maxed ? 'disabled' : ''} aria-label="${escapeHtml(item.name)} antal ${item.unitLabel}" />
         <button ${maxed ? 'disabled' : ''} onclick="buyByUnit('${item.id}',${item.unitCost},'${inputId}')">${maxed ? 'Maxat' : escapeHtml(item.buyLabel || 'Köp')}</button>
       </div>
@@ -561,8 +561,10 @@ function renderShopCard(item, inputPrefix = 'shop'){
   }
   return `
     <div class="card shopItem ${state.bought[item.id]?'bought':''}">
-      <div><div class="name">${escapeHtml(item.name)}</div><div class="small">${item.cost} mynt ${state.bought[item.id]?'– köpt':''}</div></div>
-      <button ${state.bought[item.id]?'disabled':''} onclick="buy('${item.id}',${item.cost})">${state.bought[item.id]?'Köpt':'Köp'}</button>
+      <div class="shopItemInfo"><div class="name">${escapeHtml(item.name)}</div><div class="small">${item.cost} mynt ${state.bought[item.id]?'– köpt':''}</div></div>
+      <div class="shopItemControls singleControl">
+        <button ${state.bought[item.id]?'disabled':''} onclick="buy('${item.id}',${item.cost})">${state.bought[item.id]?'Köpt':'Köp'}</button>
+      </div>
     </div>`;
 }
 function challengeCard(c){

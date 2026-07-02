@@ -108,7 +108,31 @@ select,input{width:100%;background:#0d0b08;border-color:var(--line)}
   border:1px solid #6f5525;
   box-shadow:0 18px 40px #0008, 0 0 24px #c79b3a33;
 }
-.shopItem{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.shopItem{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) 186px;
+  align-items:start;
+  gap:10px;
+}
+.shopItemInfo{min-width:0}
+.shopItemInfo .small{overflow-wrap:anywhere}
+.shopItemControls{justify-self:end}
+.repeatableControls{
+  width:186px;
+  display:grid;
+  grid-template-columns:90px 88px;
+  gap:8px;
+  align-items:center;
+}
+.singleControl{
+  width:88px;
+  display:grid;
+}
+.repeatableControls input,
+.repeatableControls button,
+.singleControl button{
+  width:100%;
+}
 .shopGrid{column-count:2;column-gap:14px}
 .shopCategory{
   border:1px solid #4a371d;
@@ -134,13 +158,11 @@ select,input{width:100%;background:#0d0b08;border-color:var(--line)}
 .repeatableItem{opacity:1}
 .repeatableItem button{
   opacity:1;
-  width:auto;
   min-width:0;
   padding:11px 12px;
   font-size:15px;
   line-height:normal;
   white-space:nowrap;
-  justify-self:start;
 }
 .medals{display:grid;grid-template-columns:1fr;gap:10px}
 .medalPentagonCard{
