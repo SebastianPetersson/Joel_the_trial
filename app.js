@@ -21,11 +21,15 @@ const WRONG_ANSWER_SOUND_SRC = './wrong_answer.wav';
 const NAE_SOUND_SRC = './Nae.m4a';
 const WINNER_IMAGE_SRC = './Joel_vinnare.png';
 const WINNER_SONG_SRC = './Vinnarlåt.wav';
+const AUDIO_ASSET_SOURCES = [EVENT_FANFARE_SRC, CHALLENGE_COMPLETE_SRC, TRANSACTION_SOUND_SRC, WRONG_ANSWER_SOUND_SRC, NAE_SOUND_SRC, WINNER_SONG_SRC];
+const assetObjectUrls = new Map();
 function createAudioTemplate(src){
   if(typeof Audio === 'undefined') return null;
-  const audio = new Audio(src);
+  const audio = new Audio();
   audio.preload = 'auto';
   audio.playsInline = true;
+  audio.src = src;
+  hydrateMediaElement(audio, src);
   audio.load();
   return audio;
 }
@@ -350,7 +354,63 @@ function createAudioFromTemplate(template, src){
   const audio = template ? template.cloneNode(true) : new Audio(src);
   audio.preload = 'auto';
   audio.playsInline = true;
+  hydrateMediaElement(audio, src);
   return audio;
+}
+async function getCachedAssetResponse(src){
+  if(!('caches' in window)) return null;
+
+  const candidates = [src];
+  try {
+    candidates.push(new URL(src, window.location.href).href);
+  } catch {}
+
+  for(const candidate of candidates){
+    try {
+      const response = await caches.match(candidate);
+      if(response) return response;
+    } catch {}
+  }
+
+  return null;
+}
+async function resolveAssetUrl(src){
+  if(assetObjectUrls.has(src)) return assetObjectUrls.get(src);
+
+  const response = await getCachedAssetResponse(src);
+  if(!response) return src;
+
+  try {
+    const blob = await response.blob();
+    const objectUrl = URL.createObjectURL(blob);
+    assetObjectUrls.set(src, objectUrl);
+    return objectUrl;
+  } catch {
+    return src;
+  }
+}
+function hydrateMediaElement(media, src){
+  resolveAssetUrl(src).then(resolvedSrc => {
+    if(media.src === resolvedSrc) return;
+    media.src = resolvedSrc;
+    media.load();
+  }).catch(() => {});
+}
+async function getAssetArrayBuffer(src){
+  const cachedResponse = await getCachedAssetResponse(src);
+  if(cachedResponse){
+    try {
+      return await cachedResponse.arrayBuffer();
+    } catch {}
+  }
+
+  const networkResponse = await fetch(src);
+  return networkResponse.arrayBuffer();
+}
+function primeAudioAssets(){
+  AUDIO_ASSET_SOURCES.forEach(src => {
+    resolveAssetUrl(src).catch(() => {});
+  });
 }
 function getAudioContext(){
   if(audioContext) return audioContext;
@@ -365,8 +425,7 @@ async function loadEventFanfareBuffer(){
   if(eventFanfareBuffer) return eventFanfareBuffer;
   if(eventFanfareBufferPromise) return eventFanfareBufferPromise;
 
-  eventFanfareBufferPromise = fetch(EVENT_FANFARE_SRC)
-    .then(response => response.arrayBuffer())
+  eventFanfareBufferPromise = getAssetArrayBuffer(EVENT_FANFARE_SRC)
     .then(arrayBuffer => new Promise((resolve, reject) => {
       context.decodeAudioData(arrayBuffer, resolve, reject);
     }))
@@ -748,6 +807,7 @@ window.addEventListener('focus', () => {
 });
 syncTimer();
 render();
+primeAudioAssets();
 allowVictoryCelebration = true;
 
 ['pointerdown','touchstart','keydown'].forEach(eventName => {
