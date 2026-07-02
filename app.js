@@ -42,6 +42,10 @@ let activeEffectAudios = [];
 let audioPlaybackUnlocked = false;
 let activeWinnerAudio = null;
 let allowVictoryCelebration = false;
+let audioContext = null;
+let eventFanfareBuffer = null;
+let eventFanfareBufferPromise = null;
+let scheduledFanfareSources = [];
 
 const medalInfo = {
   eld: ['🔥 Eldmästare','Du tämjde elden.'],
@@ -332,6 +336,10 @@ function stopEventFanfare(){
     clearTimeout(fanfareTimeoutId);
     fanfareTimeoutId = null;
   }
+  scheduledFanfareSources.forEach(source => {
+    try { source.stop(); } catch {}
+  });
+  scheduledFanfareSources = [];
   activeFanfareAudios.forEach(audio => {
     audio.pause();
     audio.currentTime = 0;
@@ -344,29 +352,90 @@ function createAudioFromTemplate(template, src){
   audio.playsInline = true;
   return audio;
 }
+function getAudioContext(){
+  if(audioContext) return audioContext;
+  const Context = window.AudioContext || window.webkitAudioContext;
+  if(!Context) return null;
+  audioContext = new Context();
+  return audioContext;
+}
+async function loadEventFanfareBuffer(){
+  const context = getAudioContext();
+  if(!context) return null;
+  if(eventFanfareBuffer) return eventFanfareBuffer;
+  if(eventFanfareBufferPromise) return eventFanfareBufferPromise;
+
+  eventFanfareBufferPromise = fetch(EVENT_FANFARE_SRC)
+    .then(response => response.arrayBuffer())
+    .then(arrayBuffer => new Promise((resolve, reject) => {
+      context.decodeAudioData(arrayBuffer, resolve, reject);
+    }))
+    .then(buffer => {
+      eventFanfareBuffer = buffer;
+      return buffer;
+    })
+    .catch(() => null)
+    .finally(() => {
+      if(!eventFanfareBuffer) eventFanfareBufferPromise = null;
+    });
+
+  return eventFanfareBufferPromise;
+}
 async function unlockAudioPlayback(){
-  if(audioPlaybackUnlocked || typeof Audio === 'undefined') return;
+  const context = getAudioContext();
+  const needsContextWarmup = !!(context && (context.state !== 'running' || !eventFanfareBuffer));
+  if(audioPlaybackUnlocked && !needsContextWarmup) return;
 
-  const unlockAttempts = audioTemplates.map(async template => {
+  if(typeof Audio !== 'undefined' && !audioPlaybackUnlocked){
+    const unlockAttempts = audioTemplates.map(async template => {
+      try {
+        template.muted = true;
+        template.currentTime = 0;
+        await template.play();
+        template.pause();
+        template.currentTime = 0;
+        template.muted = false;
+        return true;
+      } catch {
+        template.muted = false;
+        return false;
+      }
+    });
+
+    const results = await Promise.allSettled(unlockAttempts);
+    audioPlaybackUnlocked = results.some(result => result.status === 'fulfilled' && result.value);
+  }
+
+  if(context){
     try {
-      template.muted = true;
-      template.currentTime = 0;
-      await template.play();
-      template.pause();
-      template.currentTime = 0;
-      template.muted = false;
-      return true;
-    } catch {
-      template.muted = false;
-      return false;
-    }
-  });
-
-  const results = await Promise.allSettled(unlockAttempts);
-  audioPlaybackUnlocked = results.some(result => result.status === 'fulfilled' && result.value);
+      if(context.state !== 'running') await context.resume();
+      await loadEventFanfareBuffer();
+      audioPlaybackUnlocked = true;
+    } catch {}
+  }
 }
 function createEventFanfareAudio(){
   return createAudioFromTemplate(eventFanfareTemplate, EVENT_FANFARE_SRC);
+}
+function playBufferedEventFanfare(remainingPlays = 3){
+  const context = getAudioContext();
+  if(!context || !eventFanfareBuffer || context.state !== 'running') return false;
+
+  const startAt = context.currentTime + 0.05;
+  scheduledFanfareSources = [];
+
+  for(let i = 0; i < remainingPlays; i += 1){
+    const source = context.createBufferSource();
+    source.buffer = eventFanfareBuffer;
+    source.connect(context.destination);
+    source.start(startAt + (i * 3));
+    source.addEventListener('ended', () => {
+      scheduledFanfareSources = scheduledFanfareSources.filter(item => item !== source);
+    }, { once:true });
+    scheduledFanfareSources.push(source);
+  }
+
+  return true;
 }
 function startAudioFromBeginning(audio){
   const playAudio = () => {
@@ -415,8 +484,10 @@ function playWinnerSong(){
   }, { once:true });
 }
 function playEventFanfare(remainingPlays = 3){
-  if(typeof Audio === 'undefined' || remainingPlays <= 0) return;
+  if(remainingPlays <= 0) return;
   stopEventFanfare();
+  if(playBufferedEventFanfare(remainingPlays)) return;
+  if(typeof Audio === 'undefined') return;
 
   const playOnce = (playsLeft) => {
     if(playsLeft <= 0) return;
@@ -450,6 +521,7 @@ function syncTimer(){
 }
 function startTimer(){
   unlockAudioPlayback();
+  loadEventFanfareBuffer();
   syncTimer();
   state.running = true;
   state.timerEndsAt = Date.now() + (state.remaining * 1000);

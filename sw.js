@@ -1,4 +1,4 @@
-const CACHE_NAME = 'joel-provningen-v8';
+const CACHE_NAME = 'joel-provningen-v9';
 const ASSETS = [
   './',
   './index.html',
