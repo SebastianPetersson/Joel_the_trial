@@ -134,13 +134,13 @@ select,input{width:100%;background:#0d0b08;border-color:var(--line)}
 .repeatableItem{opacity:1}
 .repeatableItem button{
   opacity:1;
-  width:72px;
-  min-width:72px;
-  padding:9px 6px;
-  font-size:12px;
-  line-height:1.1;
-  text-align:center;
-  white-space:normal;
+  width:auto;
+  min-width:0;
+  padding:11px 12px;
+  font-size:15px;
+  line-height:normal;
+  white-space:nowrap;
+  justify-self:start;
 }
 .medals{display:grid;grid-template-columns:1fr;gap:10px}
 .medalPentagonCard{

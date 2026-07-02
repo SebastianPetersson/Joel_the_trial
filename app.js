@@ -18,6 +18,7 @@ const EVENT_FANFARE_SRC = './fanfare.wav';
 const CHALLENGE_COMPLETE_SRC = './klar.wav';
 const TRANSACTION_SOUND_SRC = './transaction.mp3';
 const WRONG_ANSWER_SOUND_SRC = './wrong_answer.wav';
+const NAE_SOUND_SRC = './Nae.m4a';
 const WINNER_IMAGE_SRC = './Joel_vinnare.png';
 const WINNER_SONG_SRC = './Vinnarlåt.wav';
 function createAudioTemplate(src){
@@ -32,8 +33,9 @@ const eventFanfareTemplate = createAudioTemplate(EVENT_FANFARE_SRC);
 const challengeCompleteTemplate = createAudioTemplate(CHALLENGE_COMPLETE_SRC);
 const transactionSoundTemplate = createAudioTemplate(TRANSACTION_SOUND_SRC);
 const wrongAnswerSoundTemplate = createAudioTemplate(WRONG_ANSWER_SOUND_SRC);
+const naeSoundTemplate = createAudioTemplate(NAE_SOUND_SRC);
 const winnerSongTemplate = createAudioTemplate(WINNER_SONG_SRC);
-const audioTemplates = [eventFanfareTemplate, challengeCompleteTemplate, transactionSoundTemplate, wrongAnswerSoundTemplate, winnerSongTemplate].filter(Boolean);
+const audioTemplates = [eventFanfareTemplate, challengeCompleteTemplate, transactionSoundTemplate, wrongAnswerSoundTemplate, naeSoundTemplate, winnerSongTemplate].filter(Boolean);
 let fanfareTimeoutId = null;
 let activeFanfareAudios = [];
 let activeEffectAudios = [];
@@ -301,7 +303,7 @@ function remainingPurchases(item){
   if(typeof item?.maxPurchases !== 'number') return Infinity;
   return Math.max(0, item.maxPurchases - boughtAmount(item.id));
 }
-function buy(id,cost){ if(state.bought[id])return; if(state.score<cost){ playSoundEffect(WRONG_ANSWER_SOUND_SRC, wrongAnswerSoundTemplate); toast('Inte råd'); return; } state.score-=cost; state.bought[id]=true; autoUpdateMedals(); save(); render(); playSoundEffect(TRANSACTION_SOUND_SRC, transactionSoundTemplate); toast('Köpt'); }
+function buy(id,cost){ if(state.bought[id])return; if(state.score<cost){ playInsufficientFundsSound(); toast('Inte råd'); return; } state.score-=cost; state.bought[id]=true; autoUpdateMedals(); save(); render(); playSoundEffect(TRANSACTION_SOUND_SRC, transactionSoundTemplate); toast('Köpt'); }
 function buyByUnit(id, unitCost, inputId = `${id}-qty`){
   const input = document.getElementById(inputId);
   const item = shopItems.find(shopItem => shopItem.id === id);
@@ -310,12 +312,12 @@ function buyByUnit(id, unitCost, inputId = `${id}-qty`){
   if(!Number.isInteger(qty) || qty <= 0){ toast(quantityPrompt); return; }
   const remaining = remainingPurchases(item);
   if(qty > remaining){
-    playSoundEffect(WRONG_ANSWER_SOUND_SRC, wrongAnswerSoundTemplate);
+    playInsufficientFundsSound();
     toast(remaining === 0 ? 'Max köpt' : `Max ${remaining} kvar`);
     return;
   }
   const totalCost = qty * unitCost;
-  if(state.score < totalCost){ playSoundEffect(WRONG_ANSWER_SOUND_SRC, wrongAnswerSoundTemplate); toast('Inte råd'); return; }
+  if(state.score < totalCost){ playInsufficientFundsSound(); toast('Inte råd'); return; }
   state.score -= totalCost;
   state.bought[id] = boughtAmount(id) + qty;
   autoUpdateMedals();
@@ -388,6 +390,13 @@ function playSoundEffect(src, template){
   audio.addEventListener('ended', () => {
     activeEffectAudios = activeEffectAudios.filter(item => item !== audio);
   }, { once:true });
+}
+function playInsufficientFundsSound(){
+  const useNae = Math.random() < 0.5;
+  playSoundEffect(
+    useNae ? NAE_SOUND_SRC : WRONG_ANSWER_SOUND_SRC,
+    useNae ? naeSoundTemplate : wrongAnswerSoundTemplate
+  );
 }
 function stopWinnerSong(){
   if(!activeWinnerAudio) return;
@@ -516,7 +525,7 @@ function itemRequirementCard(item){
         <div class="name ${ok?'done':''}">${escapeHtml(item.name)}</div>
         <div class="small">${item.unitCost} mynt per ${item.unitLabel}${ok?` – köpt ${amount} ${item.unitLabel}`:''}${Number.isFinite(remaining) ? ` – max ${item.maxPurchases}` : ''}</div>
       </div>
-      <div style="display:grid;grid-template-columns:90px 72px;gap:8px;align-items:center">
+      <div style="display:grid;grid-template-columns:90px auto;gap:8px;align-items:center">
         <input id="${inputId}" type="number" min="1" step="1" value="1" ${Number.isFinite(remaining) ? `max="${remaining}"` : ''} ${maxed ? 'disabled' : ''} aria-label="${escapeHtml(item.name)} antal ${item.unitLabel}" />
         <button ${maxed ? 'disabled' : ''} onclick="buyByUnit('${item.id}',${item.unitCost},'${inputId}')">${maxed ? 'Maxat' : escapeHtml(item.buyLabel || 'Köp')}</button>
       </div>
@@ -544,7 +553,7 @@ function renderShopCard(item, inputPrefix = 'shop'){
         <div class="name">${escapeHtml(item.name)}</div>
         <div class="small">${item.unitCost} mynt per ${item.unitLabel}${amount > 0 ? ` – köpt ${amount} ${item.unitLabel}` : ''}${Number.isFinite(remaining) ? ` – max ${item.maxPurchases}` : ''}</div>
       </div>
-      <div style="display:grid;grid-template-columns:90px 72px;gap:8px;align-items:center">
+      <div style="display:grid;grid-template-columns:90px auto;gap:8px;align-items:center">
         <input id="${inputId}" type="number" min="1" step="1" value="1" ${Number.isFinite(remaining) ? `max="${remaining}"` : ''} ${maxed ? 'disabled' : ''} aria-label="${escapeHtml(item.name)} antal ${item.unitLabel}" />
         <button ${maxed ? 'disabled' : ''} onclick="buyByUnit('${item.id}',${item.unitCost},'${inputId}')">${maxed ? 'Maxat' : escapeHtml(item.buyLabel || 'Köp')}</button>
       </div>
