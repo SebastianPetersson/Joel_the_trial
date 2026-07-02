@@ -478,7 +478,7 @@ function itemRequirementCard(item){
         <div class="name ${ok?'done':''}">${escapeHtml(item.name)}</div>
         <div class="small">${item.unitCost} mynt per ${item.unitLabel}${ok?` – köpt ${amount} ${item.unitLabel}`:''}${Number.isFinite(remaining) ? ` – max ${item.maxPurchases}` : ''}</div>
       </div>
-      <div style="display:grid;grid-template-columns:90px auto;gap:8px;align-items:center">
+      <div style="display:grid;grid-template-columns:90px 72px;gap:8px;align-items:center">
         <input id="${inputId}" type="number" min="1" step="1" value="1" ${Number.isFinite(remaining) ? `max="${remaining}"` : ''} ${maxed ? 'disabled' : ''} aria-label="${escapeHtml(item.name)} antal ${item.unitLabel}" />
         <button ${maxed ? 'disabled' : ''} onclick="buyByUnit('${item.id}',${item.unitCost},'${inputId}')">${maxed ? 'Maxat' : escapeHtml(item.buyLabel || 'Köp')}</button>
       </div>
@@ -506,7 +506,7 @@ function renderShopCard(item, inputPrefix = 'shop'){
         <div class="name">${escapeHtml(item.name)}</div>
         <div class="small">${item.unitCost} mynt per ${item.unitLabel}${amount > 0 ? ` – köpt ${amount} ${item.unitLabel}` : ''}${Number.isFinite(remaining) ? ` – max ${item.maxPurchases}` : ''}</div>
       </div>
-      <div style="display:grid;grid-template-columns:90px auto;gap:8px;align-items:center">
+      <div style="display:grid;grid-template-columns:90px 72px;gap:8px;align-items:center">
         <input id="${inputId}" type="number" min="1" step="1" value="1" ${Number.isFinite(remaining) ? `max="${remaining}"` : ''} ${maxed ? 'disabled' : ''} aria-label="${escapeHtml(item.name)} antal ${item.unitLabel}" />
         <button ${maxed ? 'disabled' : ''} onclick="buyByUnit('${item.id}',${item.unitCost},'${inputId}')">${maxed ? 'Maxat' : escapeHtml(item.buyLabel || 'Köp')}</button>
       </div>
