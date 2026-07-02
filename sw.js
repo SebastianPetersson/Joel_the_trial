@@ -1,4 +1,4 @@
-const CACHE_NAME = 'joel-provningen-v7';
+const CACHE_NAME = 'joel-provningen-v8';
 const ASSETS = [
   './',
   './index.html',
@@ -12,8 +12,7 @@ const ASSETS = [
   './Vinnarlåt.wav',
   './wrong_answer.wav',
   './manifest.webmanifest',
-  './icon-192.png',
-  './icon-512.png'
+  './icon.png'
 ];
 
 self.addEventListener('install', event => {
