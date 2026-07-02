@@ -7,6 +7,7 @@ const ASSETS = [
   './fanfare.wav',
   './klar.wav',
   './transaction.mp3',
+  './wrong_answer.wav',
   './manifest.webmanifest',
   './icon-192.png',
   './icon-512.png'

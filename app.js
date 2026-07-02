@@ -17,6 +17,7 @@ if(!state.running) state.timerEndsAt = null;
 const EVENT_FANFARE_SRC = './fanfare.wav';
 const CHALLENGE_COMPLETE_SRC = './klar.wav';
 const TRANSACTION_SOUND_SRC = './transaction.mp3';
+const WRONG_ANSWER_SOUND_SRC = './wrong_answer.wav';
 function createAudioTemplate(src){
   if(typeof Audio === 'undefined') return null;
   const audio = new Audio(src);
@@ -28,7 +29,8 @@ function createAudioTemplate(src){
 const eventFanfareTemplate = createAudioTemplate(EVENT_FANFARE_SRC);
 const challengeCompleteTemplate = createAudioTemplate(CHALLENGE_COMPLETE_SRC);
 const transactionSoundTemplate = createAudioTemplate(TRANSACTION_SOUND_SRC);
-const audioTemplates = [eventFanfareTemplate, challengeCompleteTemplate, transactionSoundTemplate].filter(Boolean);
+const wrongAnswerSoundTemplate = createAudioTemplate(WRONG_ANSWER_SOUND_SRC);
+const audioTemplates = [eventFanfareTemplate, challengeCompleteTemplate, transactionSoundTemplate, wrongAnswerSoundTemplate].filter(Boolean);
 let fanfareTimeoutId = null;
 let activeFanfareAudios = [];
 let activeEffectAudios = [];
@@ -295,7 +297,7 @@ function boughtAmount(id){
   const value = state.bought[id];
   return typeof value === 'number' && Number.isFinite(value) ? Math.max(0, value) : (value ? 1 : 0);
 }
-function buy(id,cost){ if(state.bought[id])return; if(state.score<cost){ toast('Inte råd'); return; } state.score-=cost; state.bought[id]=true; autoUpdateMedals(); save(); render(); playSoundEffect(TRANSACTION_SOUND_SRC, transactionSoundTemplate); toast('Köpt'); }
+function buy(id,cost){ if(state.bought[id])return; if(state.score<cost){ playSoundEffect(WRONG_ANSWER_SOUND_SRC, wrongAnswerSoundTemplate); toast('Inte råd'); return; } state.score-=cost; state.bought[id]=true; autoUpdateMedals(); save(); render(); playSoundEffect(TRANSACTION_SOUND_SRC, transactionSoundTemplate); toast('Köpt'); }
 function buyByUnit(id, unitCost, inputId = `${id}-qty`){
   const input = document.getElementById(inputId);
   const item = shopItems.find(shopItem => shopItem.id === id);
@@ -303,7 +305,7 @@ function buyByUnit(id, unitCost, inputId = `${id}-qty`){
   const quantityPrompt = item?.quantityPrompt || 'Ange antal';
   if(!Number.isInteger(qty) || qty <= 0){ toast(quantityPrompt); return; }
   const totalCost = qty * unitCost;
-  if(state.score < totalCost){ toast('Inte råd'); return; }
+  if(state.score < totalCost){ playSoundEffect(WRONG_ANSWER_SOUND_SRC, wrongAnswerSoundTemplate); toast('Inte råd'); return; }
   state.score -= totalCost;
   state.bought[id] = boughtAmount(id) + qty;
   autoUpdateMedals();
