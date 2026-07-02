@@ -47,15 +47,12 @@ h3{font-size:18px;margin:16px 0 8px;color:#e6c77e}
 }
 .scoreCard{position:relative;margin:14px 0;padding:15px 15px 58px;border-color:#6f5525}
 .scoreRow{display:flex;justify-content:space-between;align-items:center;gap:12px}
-.scoreSummary{display:flex;align-items:baseline;gap:12px;min-width:0;flex-wrap:wrap}
-.scoreLabel,
 .score{
   font-family:system-ui,sans-serif;
   font-size:clamp(34px,7vw,62px);
   font-weight:1000;
   line-height:.9;
 }
-.scoreLabel{color:var(--muted);font-size:clamp(17px,3.5vw,31px)}
 .score{color:var(--gold)}
 .settingsGear{
   position:absolute;
