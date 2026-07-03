@@ -14,13 +14,13 @@ state.timerEndsAt = typeof state.timerEndsAt === 'number' ? state.timerEndsAt : 
 if(state.running && !state.timerEndsAt) state.timerEndsAt = Date.now() + (state.remaining * 1000);
 if(!state.running) state.timerEndsAt = null;
 
-const EVENT_FANFARE_SRC = './fanfare.wav';
-const CHALLENGE_COMPLETE_SRC = './klar.wav';
-const TRANSACTION_SOUND_SRC = './transaction.mp3';
-const WRONG_ANSWER_SOUND_SRC = './wrong_answer.wav';
+const EVENT_FANFARE_SRC = './fanfare.m4a';
+const CHALLENGE_COMPLETE_SRC = './klar.m4a';
+const TRANSACTION_SOUND_SRC = './transaction.m4a';
+const WRONG_ANSWER_SOUND_SRC = './wrong_answer.m4a';
 const NAE_SOUND_SRC = './Nae.m4a';
 const WINNER_IMAGE_SRC = './Joel_vinnare.png';
-const WINNER_SONG_SRC = './Vinnarlåt.wav';
+const WINNER_SONG_SRC = './vinnarlåt.m4a';
 const AUDIO_ASSET_SOURCES = [EVENT_FANFARE_SRC, CHALLENGE_COMPLETE_SRC, TRANSACTION_SOUND_SRC, WRONG_ANSWER_SOUND_SRC, NAE_SOUND_SRC, WINNER_SONG_SRC];
 const assetObjectUrls = new Map();
 function createAudioTemplate(src){
