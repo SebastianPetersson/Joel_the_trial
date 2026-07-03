@@ -2,10 +2,23 @@
 // Ändra challenges, shop, special events och medaljkrav i listorna nedan.
 
 const DEFAULT_INTERVAL = 30 * 60;
-let state = JSON.parse(localStorage.getItem('joelSurvivalPWA') || 'null') || {
-  score:0, remaining:DEFAULT_INTERVAL, interval:DEFAULT_INTERVAL, running:false,
-  currentEvent:'Ingen ännu', done:{}, medals:{}, custom:[], bought:{}, timerEndsAt:null, usedEvents:{}
-};
+const STORAGE_KEY = 'joelSurvivalPWA';
+function createInitialState(){
+  return {
+    score:0,
+    remaining:DEFAULT_INTERVAL,
+    interval:DEFAULT_INTERVAL,
+    running:false,
+    currentEvent:'Ingen ännu',
+    done:{},
+    medals:{},
+    custom:[],
+    bought:{},
+    timerEndsAt:null,
+    usedEvents:{}
+  };
+}
+let state = JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null') || createInitialState();
 state.done ||= {}; state.medals ||= {}; state.custom ||= []; state.bought ||= {}; state.usedEvents ||= {};
 if(typeof state.interval !== 'number' || state.interval <= 0) state.interval = DEFAULT_INTERVAL;
 if(typeof state.remaining !== 'number' || state.remaining < 0) state.remaining = state.interval;
@@ -236,8 +249,9 @@ function renderMedalPentagon(ids){
     const label = medalInfo[id][0].replace(/^[^\p{L}\p{N}]+\s*/u, '');
     const words = label.split(' ');
     const mid = Math.ceil(words.length / 2);
-    const lineOne = escapeHtml(words.slice(0, mid).join(' '));
-    const lineTwo = escapeHtml(words.slice(mid).join(' '));
+    const singleLineLabel = id === 'djup';
+    const lineOne = escapeHtml(singleLineLabel ? label : words.slice(0, mid).join(' '));
+    const lineTwo = escapeHtml(singleLineLabel ? '' : words.slice(mid).join(' '));
     const textAnchor = Math.abs(labelPoint.x - center) < 18 ? 'middle' : (labelPoint.x < center ? 'end' : 'start');
     return `
       <g class="medalSliceGroup">
@@ -287,7 +301,7 @@ function autoUpdateMedals(){
     celebrateVictory();
   }
 }
-function save(){ localStorage.setItem('joelSurvivalPWA', JSON.stringify(state)); }
+function save(){ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
 function escapeHtml(value){
   return String(value).replace(/[&<>"']/g, char => ({
     '&':'&amp;',
@@ -642,7 +656,18 @@ function addCustomChallenge(){
   document.getElementById('newName').value=''; document.getElementById('newPts').value='';
   save(); render(); showTabById('challenges');
 }
-function hardReset(){ if(confirm('Nollställa allt?')){ localStorage.removeItem('joelSurvivalPWA'); location.reload(); } }
+function hardReset(){
+  if(!confirm('Nollställa allt?')) return;
+  localStorage.removeItem(STORAGE_KEY);
+  state = createInitialState();
+  stopEventFanfare();
+  stopWinnerSong();
+  closeModal();
+  closeWinnerModal();
+  save();
+  render();
+  showTabById('challenges');
+}
 
 function itemRequirementCard(item){
   const amount = boughtAmount(item.id);
